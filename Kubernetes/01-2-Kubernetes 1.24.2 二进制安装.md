@@ -1,30 +1,35 @@
-<h2 id="Jnjti">一、环境准备</h2>
-| **<font style="color:rgb(79, 79, 79);">操作系统</font>** | **内核版本** | **<font style="color:rgb(79, 79, 79);">IP地址</font>** |  **<font style="color:rgb(79, 79, 79);">角色</font>**  | **<font style="color:rgb(79, 79, 79);">硬盘</font>** | **<font style="color:rgb(79, 79, 79);">CPU & MEM</font>** |
-| :------------------------------------------------------: | ------------ | ------------------------------------------------------ | :----------------------------------------------------: | :--------------------------------------------------: | :-------------------------------------------------------: |
-|   <font style="color:rgb(79, 79, 79);">Centos 8</font>   | 5.4+         | 192.168.124.21                                         | <font style="color:rgb(79, 79, 79);">k8s-master</font> |   <font style="color:rgb(79, 79, 79);">50GB</font>   |     <font style="color:rgb(79, 79, 79);">2核4G</font>     |
-|   <font style="color:rgb(79, 79, 79);">Centos 8</font>   | 5.4+         | 192.168.124.22                                         | <font style="color:rgb(79, 79, 79);">k8s-node1</font>  |   <font style="color:rgb(79, 79, 79);">50GB</font>   |    <font style="color:rgb(79, 79, 79);">4核10G</font>     |
-|   <font style="color:rgb(79, 79, 79);">Centos 8</font>   | 5.4+         | 192.168.124.23                                         | <font style="color:rgb(79, 79, 79);">k8s-node2</font>  |   <font style="color:rgb(79, 79, 79);">50GB</font>   |    <font style="color:rgb(79, 79, 79);">4核10G</font>     |
+## 一、环境准备
 
-<h2 id="Tsgzr"><font style="color:rgb(79, 79, 79);">二、系统初始化</font></h2>
-<h3 id="WNKcJ">2.1 关闭防火墙</h3>
+| **<font style="color:rgb(79, 79, 79);">操作系统</font>** | **内核版本** | **<font style="color:rgb(79, 79, 79);">IP 地址</font>** |  **<font style="color:rgb(79, 79, 79);">角色</font>**  | **<font style="color:rgb(79, 79, 79);">硬盘</font>** | **<font style="color:rgb(79, 79, 79);">CPU & MEM</font>** |
+| :------------------------------------------------------: | ------------ | ------------------------------------------------------- | :----------------------------------------------------: | :--------------------------------------------------: | :-------------------------------------------------------: |
+|   <font style="color:rgb(79, 79, 79);">Centos 8</font>   | 5.4+         | 192.168.124.21                                          | <font style="color:rgb(79, 79, 79);">k8s-master</font> |   <font style="color:rgb(79, 79, 79);">50GB</font>   |    <font style="color:rgb(79, 79, 79);">2 核 4G</font>    |
+|   <font style="color:rgb(79, 79, 79);">Centos 8</font>   | 5.4+         | 192.168.124.22                                          | <font style="color:rgb(79, 79, 79);">k8s-node1</font>  |   <font style="color:rgb(79, 79, 79);">50GB</font>   |   <font style="color:rgb(79, 79, 79);">4 核 10G</font>    |
+|   <font style="color:rgb(79, 79, 79);">Centos 8</font>   | 5.4+         | 192.168.124.23                                          | <font style="color:rgb(79, 79, 79);">k8s-node2</font>  |   <font style="color:rgb(79, 79, 79);">50GB</font>   |   <font style="color:rgb(79, 79, 79);">4 核 10G</font>    |
+
+## <font style="color:rgb(79, 79, 79);">二、系统初始化</font>
+
+### 2.1 关闭防火墙
+
 ```bash
 systemctl stop firewalld
 systemctl disable firewalld
 ```
 
-<h3 id="E3VVh">2.2 关闭SELINUX</h3>
+### 2.2 关闭 SELINUX
+
 ```bash
 setenforce 0
 sed -ri 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 ```
 
-<h3 id="Nb2li">2.3 关闭swap分区</h3>
+### 2.3 关闭 swap 分区
+
 ```bash
 swapoff -a
 sed -ri 's/.*swap.*/#&/' /etc/fstab
 ```
 
-<h3 id="nPdB9">2.4 规划主机名</h3>
+### 2.4 规划主机名
 
 ```bash
 hostnamectl set-hostname k8s-master
@@ -32,7 +37,8 @@ hostnamectl set-hostname k8s-nod1
 hostnamectl set-hostname k8s-nod2
 ```
 
-<h3 id="bbc8H">2.5 配置hosts解析</h3>
+### 2.5 配置 hosts 解析
+
 ```bash
 cat >>/etc/hosts<<-EOF
 192.168.124.21 k8s-master
@@ -41,54 +47,51 @@ cat >>/etc/hosts<<-EOF
 EOF
 ```
 
-<h3 id="UPlox">2.6 配置yum源</h3>
+### 2.6 配置 yum 源
+
 ```bash
 # BaseRepo
 curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-vault-8.5.2111.repo
 
-# Epel
 
+# Epel
 yum install -y https://mirrors.aliyun.com/epel/epel-release-latest-8.noarch.rpm
 sed -i 's|^#baseurl=https://download.example/pub|baseurl=https://mirrors.aliyun.com|' /etc/yum.repos.d/epel*
 sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
+```
 
-````
+### 2.7 常用工具
 
-<h3 id="i3ujJ">2.7 常用工具</h3>
 ```bash
 yum -y install wget jq psmisc vim net-tools nfs-utils telnet yum-utils device-mapper-persistent-data lvm2 git network-scripts tar curl -y
-````
+```
 
-<h3 id="nB2fV">2.8 二进制包下载</h3>
+### 2.8 二进制包下载
+
 ```bash
 # Kubernetes
 https://storage.googleapis.com/kubernetes-release/release/v1.24.2/kubernetes-server-linux-amd64.tar.gz
 
 # cfssl
-
 https://github.com/cloudflare/cfssl/releases/download/v1.6.1/cfssl_1.6.1_linux_amd64
 https://github.com/cloudflare/cfssl/releases/download/v1.6.1/cfssljson_1.6.1_linux_amd64
 https://github.com/cloudflare/cfssl/releases/download/v1.6.1/cfssl-certinfo_1.6.1_linux_amd64
 
 # Etcd
-
 https://github.com/etcd-io/etcd/releases/download/v3.5.4/etcd-v3.5.4-linux-amd64.tar.gz
 
 # Containerd
-
 https://github.com/containerd/containerd/releases/download/v1.6.8/cri-containerd-cni-1.6.8-linux-amd64.tar.gz
 
-# crictl 客户端
-
+# crictl客户端
 https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.24.2/crictl-v1.24.2-linux-amd64.tar.gz
 
-# CNI 插件
-
+# CNI插件
 https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz
+```
 
-````
+### 2.9 网络配置
 
-<h3 id="tuWU7">2.9 网络配置</h3>
 ```bash
 # 方式一
 systemctl disable --now NetworkManager
@@ -100,13 +103,14 @@ cat > /etc/NetworkManager/conf.d/calico.conf << EOF
 unmanaged-devices=interface-name:cali*;interface-name:tunl*
 EOF
 systemctl restart NetworkManager
-````
+```
 
-<h3 id="VYFmX">2.10 时间同步 </h3>
+### 2.10 时间同步
+
 ```bash
 # 使用阿里的时间服务器
 yum install chrony -y
-cat > /etc/chrony.conf << EOF 
+cat > /etc/chrony.conf << EOF
 pool ntp.aliyun.com iburst
 driftfile /var/lib/chrony/drift
 makestep 1.0 3
@@ -119,12 +123,11 @@ EOF
 systemctl start chronyd && systemctl enabel chronyd
 
 # 使用客户端进行验证
-
 chronyc sources -v
+```
 
-````
+### <font style="color:rgb(79, 79, 79);">2.11 配置 ulimit</font>
 
-<h3 id="eKzIX"><font style="color:rgb(79, 79, 79);">2.11 配置ulimit</font></h3>
 ```bash
 ulimit -SHn 65535
 cat >> /etc/security/limits.conf <<EOF
@@ -135,9 +138,10 @@ cat >> /etc/security/limits.conf <<EOF
 * seft memlock unlimited
 * hard memlock unlimitedd
 EOF
-````
+```
 
-<h3 id="qnGkW">2.12 配置免密登录</h3>
+### 2.12 配置免密登录
+
 ```bash
 yum install -y sshpass
 ssh-keygen -f /root/.ssh/id_rsa -P ''
@@ -148,10 +152,11 @@ for HOST in $IP;do
 done
 ```
 
-<h3 id="ZNwjx">2.13 安装ipvsadm</h3>
+### 2.13 安装 ipvsadm
+
 ```bash
 yum install ipvsadm ipset sysstat conntrack libseccomp -y
-cat > /etc/modules-load.d/ipvs.conf <<EOF 
+cat > /etc/modules-load.d/ipvs.conf <<EOF
 ip_vs
 ip_vs_rr
 ip_vs_wrr
@@ -165,9 +170,9 @@ ipt_rpfilter
 ipt_REJECT
 ipip
 EOF
- 
+
 systemctl restart systemd-modules-load.service
- 
+
 lsmod | grep -e ip_vs -e nf_conntrack
 ip_vs_sh               16384  0
 ip_vs_wrr              16384  0
@@ -177,7 +182,8 @@ nf_conntrack          176128  1 ip_vs
 libcrc32c              16384  3 nf_conntrack,xfs,ip_vs
 ```
 
-<h3 id="bLJQO">2.14 修改内核参数</h3>
+### 2.14 修改内核参数
+
 ```bash
 cat <<EOF > /etc/sysctl.d/k8s.conf
 net.ipv4.ip_forward = 1
@@ -189,7 +195,7 @@ fs.inotify.max_user_watches=89100
 fs.file-max=52706963
 fs.nr_open=52706963
 net.netfilter.nf_conntrack_max=2310720
- 
+
 net.ipv4.tcp_keepalive_time = 600
 net.ipv4.tcp_keepalive_probes = 3
 net.ipv4.tcp_keepalive_intvl =15
@@ -203,37 +209,40 @@ net.ipv4.ip_conntrack_max = 65536
 net.ipv4.tcp_max_syn_backlog = 16384
 net.ipv4.tcp_timestamps = 0
 net.core.somaxconn = 16384
- 
+
 net.ipv6.conf.all.disable_ipv6 = 0
 net.ipv6.conf.default.disable_ipv6 = 0
 net.ipv6.conf.lo.disable_ipv6 = 0
 net.ipv6.conf.all.forwarding = 1
 EOF
- 
+
 sysctl --system
 ```
 
-<h2 id="Qa0be">三、Kubernetes基本组件安装</h2>
-<h3 id="v3svg">3.1 Containerd</h3>
-<h4 id="zQeBK">3.1.1 Containerd安装配置</h4>
+## 三、Kubernetes 基本组件安装
+
+### 3.1 Containerd
+
+#### 3.1.1 Containerd 安装配置
+
 ```bash
 # wget https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz
 #创建cni插件所需目录
-mkdir -p /etc/cni/net.d /opt/cni/bin 
+mkdir -p /etc/cni/net.d /opt/cni/bin
 #解压cni二进制包
 tar xf cni-plugins-linux-amd64-v1.1.1.tgz -C /opt/cni/bin/
- 
+
 # wget https://github.com/containerd/containerd/releases/download/v1.6.6/cri-containerd-cni-1.6.6-linux-amd64.tar.gz
 #解压
 tar -xzf cri-containerd-cni-1.6.8-linux-amd64.tar.gz -C /
- 
+
 #创建服务启动文件
 cat > /etc/systemd/system/containerd.service <<EOF
 [Unit]
 Description=containerd container runtime
 Documentation=https://containerd.io
 After=network.target local-fs.target
- 
+
 [Service]
 ExecStartPre=-/sbin/modprobe overlay
 ExecStart=/usr/local/bin/containerd
@@ -247,13 +256,14 @@ LimitCORE=infinity
 LimitNOFILE=infinity
 TasksMax=infinity
 OOMScoreAdjust=-999
- 
+
 [Install]
 WantedBy=multi-user.target
 EOF
 ```
 
-<h4 id="hEpqz"><font style="color:rgb(79, 79, 79);">3.1.2 配置Containerd所需的模块</font></h4>
+#### <font style="color:rgb(79, 79, 79);">3.1.2 配置 Containerd 所需的模块</font>
+
 ```bash
 cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
 overlay
@@ -261,12 +271,11 @@ br_netfilter
 EOF
 
 # 加载模块
-
 systemctl restart systemd-modules-load.service
+```
 
-````
+#### <font style="color:rgb(79, 79, 79);">3.1.3 配置 Containerd 所需的内核</font>
 
-<h4 id="V7Ovc"><font style="color:rgb(79, 79, 79);">3.1.3 配置Containerd所需的内核</font></h4>
 ```bash
 cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
 net.bridge.bridge-nf-call-iptables  = 1
@@ -276,32 +285,35 @@ EOF
 
 # 加载内核
 sysctl --system
-````
+```
 
-<h4 id="nqHem"><font style="color:rgb(79, 79, 79);">3.1.4 创建Containerd的配置文件</font></h4>
+#### <font style="color:rgb(79, 79, 79);">3.1.4 创建 Containerd 的配置文件</font>
+
 ```bash
 # 创建默认配置文件
 mkdir -p /etc/containerd
 containerd config default | tee /etc/containerd/config.toml
- 
+
 # 修改Containerd的配置文件
 sed -i "s#SystemdCgroup\ \=\ false#SystemdCgroup\ \=\ true#g" /etc/containerd/config.toml
 cat /etc/containerd/config.toml | grep SystemdCgroup
- 
+
 sed -i "s#k8s.gcr.io#registry.cn-hangzhou.aliyuncs.com/chenby#g" /etc/containerd/config.toml
 cat /etc/containerd/config.toml | grep sandbox_image
 ```
 
-<h4 id="OjMbG"><font style="color:rgb(79, 79, 79);">3.1.5 启动并设置为开机启动</font></h4>
+#### <font style="color:rgb(79, 79, 79);">3.1.5 启动并设置为开机启动</font>
+
 ```bash
 systemctl daemon-reload
 systemctl enable --now containerd
 ```
 
-<h4 id="eH5p5"><font style="color:rgb(79, 79, 79);">3.1.6 配置crictl客户端连接的运行位置</font></h4>
+#### <font style="color:rgb(79, 79, 79);">3.1.6 配置 crictl 客户端连接的运行位置</font>
+
 ```bash
 # wget https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.24.2/crictl-v1.24.2-linux-amd64.tar.gz
- 
+
 # 解压
 tar xf crictl-v1.24.2-linux-amd64.tar.gz -C /usr/bin/
 # 生成配置文件
@@ -311,14 +323,16 @@ image-endpoint: unix:///run/containerd/containerd.sock
 timeout: 10
 debug: false
 EOF
- 
+
 # 测试
 systemctl restart  containerd
 crictl info
 ```
 
-<h3 id="UtkR6">3.2 Etcd</h3>
-<h4 id="dgEQ8">3.2.1 安装包和工具</h4>
+### 3.2 Etcd
+
+#### 3.2.1 安装包和工具
+
 ```bash
 wget https://github.com/cloudflare/cfssl/releases/download/v1.6.1/cfssl_1.6.1_linux_amd64
 wget https://github.com/cloudflare/cfssl/releases/download/v1.6.1/cfssljson_1.6.1_linux_amd64
@@ -328,9 +342,8 @@ chmod +x cfssl_1.6.1_linux_amd64 cfssljson_1.6.1_linux_amd64 cfssl-certinfo_1.6.
 
 mv cfssl_1.6.1_linux_amd64 /usr/bin/cfssl
 mv cfssljson_1.6.1_linux_amd64 /usr/bin/cfssljson
-mv cfssl-certinfo_1.6.1_linux_amd64 /usr/bin/cfssl-certinfo
-
-````
+mv cfssl-certinfo_1.6.1_linux_amd64  /usr/bin/cfssl-certinfo
+```
 
 ```bash
 wget https://github.com/etcd-io/etcd/releases/download/v3.5.4/etcd-v3.5.4-linux-amd64.tar.gz
@@ -338,56 +351,55 @@ wget https://github.com/etcd-io/etcd/releases/download/v3.5.4/etcd-v3.5.4-linux-
 mkdir -p /opt/etcd/{ssl,bin,cfg}
 
 tar -xvf etcd*.tar.gz && mv etcd-*/etcd /opt/etcd/bin/ && mv etcd-*/etcdctl /opt/etcd/bin/
-````
+```
 
-<h4 id="DsOZk">3.2.2 签发Etcd证书</h4>
+#### 3.2.2 签发 Etcd 证书
+
 ```json
 mkdir ~/TLS/{etcd,k8s} -p
 cd ~/TLS/etcd
 
 cat > ca-config.json << EOF
 {
-"signing": {
-"default": {
-"expiry": "87600h"
-},
-"profiles": {
-"www": {
-"expiry": "87600h",
-"usages": [
-"signing",
-"key encipherment",
-"server auth",
-"client auth"
-]
-}
-}
-}
+  "signing": {
+    "default": {
+      "expiry": "87600h"
+    },
+    "profiles": {
+      "www": {
+         "expiry": "87600h",
+         "usages": [
+            "signing",
+            "key encipherment",
+            "server auth",
+            "client auth"
+        ]
+      }
+    }
+  }
 }
 EOF
 
 cat > ca-csr.json << EOF
 {
-"CN": "etcd CA",
-"key": {
-"algo": "rsa",
-"size": 2048
-},
-"names": [
-{
-"C": "CN",
-"L": "Beijing",
-"ST": "Beijing"
-}
-]
+    "CN": "etcd CA",
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "L": "Beijing",
+            "ST": "Beijing"
+        }
+    ]
 }
 EOF
 
 # 生成证书：
-
 cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
-
-````
+```
 
 ```json
 cat > server-csr.json << EOF
@@ -417,9 +429,10 @@ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=www 
 
 # 复制证书到etcd目录下
 cp ~/TLS/etcd/ca*pem ~/TLS/etcd/server*pem /opt/etcd/ssl/
-````
+```
 
-<h4 id="aDeSR">3.2.3 Etcd配置文件和启动配置</h4>
+#### 3.2.3 Etcd 配置文件和启动配置
+
 ```nginx
 cat > /opt/etcd/cfg/etcd.conf << EOF
 #[Member]
@@ -469,7 +482,8 @@ systemctl enable etcd
 systemctl status etcd
 ```
 
-<h4 id="NTEAT">3.2.4 验证</h4>
+#### 3.2.4 验证
+
 ```bash
 # 验证Etcd集群
 ETCDCTL_API=3 /opt/etcd/bin/etcdctl --cacert=/opt/etcd/ssl/ca.pem --cert=/opt/etcd/ssl/server.pem --key=/opt/etcd/ssl/server-key.pem --endpoints="https://192.168.124.21:2379" endpoint health --write-out=table
@@ -477,20 +491,21 @@ ETCDCTL_API=3 /opt/etcd/bin/etcdctl --cacert=/opt/etcd/ssl/ca.pem --cert=/opt/et
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667311008679-9befdae3-4af4-4167-8c97-96336eecaead.png)
 
-<h3 id="KqNk6">3.3 Kube-Apiserver</h3>
-<h4 id="OympI">3.3.1 安装包</h4>
+### 3.3 Kube-Apiserver
+
+#### 3.3.1 安装包
+
 ```bash
 wget https://dl.k8s.io/v1.24.2/kubernetes-server-linux-amd64.tar.gz
 
-# 解压 k8s 安装文件
-
+# 解压k8s安装文件
 mkdir -p /opt/kubernetes/{bin,cfg,ssl,logs}
-tar -xvf kubernetes-server-linux-amd64.tar.gz --strip-components=3 -C /opt/kubernetes/bin kubernetes/server/bin/kube{let,ctl,-apiserver,-controller-manager,-scheduler,-proxy}
+tar -xvf kubernetes-server-linux-amd64.tar.gz  --strip-components=3 -C /opt/kubernetes/bin kubernetes/server/bin/kube{let,ctl,-apiserver,-controller-manager,-scheduler,-proxy}
 cp /opt/kubernetes/bin/kube{let,ctl,-proxy} /usr/local/bin
+```
 
-````
+#### 3.3.2 签发 Apiserver 证书
 
-<h4 id="vNbuf">3.3.2 签发Apiserver证书</h4>
 ```bash
 cd ~/TLS/k8s
 
@@ -535,7 +550,7 @@ EOF
 
 # 生成证书：
 cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
-````
+```
 
 ```bash
 cat > server-csr.json << EOF
@@ -584,7 +599,8 @@ TLS Bootstraping：Master apiserver启用TLS认证后，Node节点kubelet和kube
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667311976684-3fbd7553-31cf-4e15-8b01-2710db3d8cf2.png)
 
-<h4 id="VqLu5">3.3.3 创建token</h4>
+#### 3.3.3 创建 token
+
 ```bash
 # 创建上述配置文件中token文件：
 cat > /opt/kubernetes/cfg/token.csv << EOF
@@ -595,7 +611,8 @@ token也可自行生成替换：
 head -c 16 /dev/urandom | od -An -t x | tr -d ' '
 ```
 
-<h4 id="HWKlV">3.3.4 Apiserver配置文件</h4>
+#### 3.3.4 Apiserver 配置文件
+
 ```bash
 cat > /opt/kubernetes/cfg/kube-apiserver.conf << EOF
 KUBE_APISERVER_OPTS="--logtostderr=false \\
@@ -662,7 +679,8 @@ EOF
 • 启动聚合层相关配置：--requestheader-client-ca-file，--proxy-client-cert-file，--proxy-client-key-file，--requestheader-allowed-names，--requestheader-extra-headers-prefix，--requestheader-group-headers，--requestheader-username-headers，--enable-aggregator-routing
 ```
 
-<h4 id="iDDGD">3.3.5 systemd管理Apiserver</h4>
+#### 3.3.5 systemd 管理 Apiserver
+
 ```bash
 cat > /etc/systemd/system/kube-apiserver.service << EOF
 [Unit]
@@ -679,18 +697,18 @@ WantedBy=multi-user.target
 EOF
 
 # 启动并设置开机启动
-
 systemctl daemon-reload
 systemctl restart kube-apiserver
 systemctl enable kube-apiserver
 systemctl status kube-apiserver
-
-````
+```
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667312203092-b8876c05-dd11-4b77-8311-81c1c263716b.png)
 
-<h3 id="YIAad">3.4 Kube-Controller-Manager</h3>
-<h4 id="Bitka">3.4.1 签发Controller-Manager证书</h4>
+### 3.4 Kube-Controller-Manager
+
+#### 3.4.1 签发 Controller-Manager 证书
+
 ```json
 cd ~/TLS/k8s
 
@@ -716,37 +734,38 @@ EOF
 
 # 生成证书
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager
-````
+```
 
-<h4 id="HIpJ0">3.4.2 生成Kubeconfig文件</h4>
+#### 3.4.2 生成 Kubeconfig 文件
+
 ```bash
 KUBE_CONFIG="/opt/kubernetes/cfg/kube-controller-manager.kubeconfig"
 KUBE_APISERVER="https://192.168.124.21:6443"
 
 kubectl config set-cluster kubernetes \
- --certificate-authority=/opt/kubernetes/ssl/ca.pem \
- --embed-certs=true \
- --server=${KUBE_APISERVER} \
+  --certificate-authority=/opt/kubernetes/ssl/ca.pem \
+  --embed-certs=true \
+  --server=${KUBE_APISERVER} \
   --kubeconfig=${KUBE_CONFIG}
 
 kubectl config set-credentials kube-controller-manager \
- --client-certificate=./kube-controller-manager.pem \
- --client-key=./kube-controller-manager-key.pem \
- --embed-certs=true \
- --kubeconfig=${KUBE_CONFIG}
+  --client-certificate=./kube-controller-manager.pem \
+  --client-key=./kube-controller-manager-key.pem \
+  --embed-certs=true \
+  --kubeconfig=${KUBE_CONFIG}
 
 kubectl config set-context default \
- --cluster=kubernetes \
- --user=kube-controller-manager \
- --kubeconfig=${KUBE_CONFIG}
+  --cluster=kubernetes \
+  --user=kube-controller-manager \
+  --kubeconfig=${KUBE_CONFIG}
 
 kubectl config use-context default --kubeconfig=${KUBE_CONFIG}
-
-````
+```
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667393115923-2f4a54d7-a805-47d8-8ecd-f6a93ba37d75.png)
 
-<h4 id="LYRwy">3.4.3 Controller-Manager配置文件</h4>
+#### 3.4.3 Controller-Manager 配置文件
+
 ```bash
 cat > /opt/kubernetes/cfg/kube-controller-manager.conf << EOF
 KUBE_CONTROLLER_MANAGER_OPTS="--logtostderr=false \\
@@ -764,7 +783,7 @@ KUBE_CONTROLLER_MANAGER_OPTS="--logtostderr=false \\
 --service-account-private-key-file=/opt/kubernetes/ssl/ca-key.pem \\
 --cluster-signing-duration=87600h0m0s"
 EOF
-````
+```
 
 ```bash
 •--kubeconfig：连接apiserver配置文件
@@ -772,7 +791,8 @@ EOF
 •--cluster-signing-cert-file/--cluster-signing-key-file：自动为kubelet颁发证书的CA，与apiserver保持一致
 ```
 
-<h4 id="oYBDH">3.4.4 systemd管理Kube-Controller-Manager</h4>
+#### 3.4.4 systemd 管理 Kube-Controller-Manager
+
 ```bash
 cat > /etc/systemd/system/kube-controller-manager.service << EOF
 [Unit]
@@ -789,18 +809,18 @@ WantedBy=multi-user.target
 EOF
 
 # 启动并设置开机启动
-
 systemctl daemon-reload
 systemctl restart kube-controller-manager
 systemctl enable kube-controller-manager
 systemctl status kube-controller-manager
-
-````
+```
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667393400966-78d936bf-c922-4836-9cd7-f26ba697e192.png)
 
-<h3 id="S9Ymt">3.5 Kube-Scheduler</h3>
-<h4 id="TDcwO">3.5.1 签发Scheduler证书</h4>
+### 3.5 Kube-Scheduler
+
+#### 3.5.1 签发 Scheduler 证书
+
 ```json
 cd ~/TLS/k8s
 
@@ -826,37 +846,38 @@ EOF
 
 # 生成证书
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes kube-scheduler-csr.json | cfssljson -bare kube-scheduler
-````
+```
 
-<h4 id="ddEtk">3.5.2 生成Kubeconfig文件</h4>
+#### 3.5.2 生成 Kubeconfig 文件
+
 ```bash
 KUBE_CONFIG="/opt/kubernetes/cfg/kube-scheduler.kubeconfig"
 KUBE_APISERVER="https://192.168.124.21:6443"
 
 kubectl config set-cluster kubernetes \
- --certificate-authority=/opt/kubernetes/ssl/ca.pem \
- --embed-certs=true \
- --server=${KUBE_APISERVER} \
+  --certificate-authority=/opt/kubernetes/ssl/ca.pem \
+  --embed-certs=true \
+  --server=${KUBE_APISERVER} \
   --kubeconfig=${KUBE_CONFIG}
 
 kubectl config set-credentials kube-scheduler \
- --client-certificate=./kube-scheduler.pem \
- --client-key=./kube-scheduler-key.pem \
- --embed-certs=true \
- --kubeconfig=${KUBE_CONFIG}
+  --client-certificate=./kube-scheduler.pem \
+  --client-key=./kube-scheduler-key.pem \
+  --embed-certs=true \
+  --kubeconfig=${KUBE_CONFIG}
 
 kubectl config set-context default \
- --cluster=kubernetes \
- --user=kube-scheduler \
- --kubeconfig=${KUBE_CONFIG}
+  --cluster=kubernetes \
+  --user=kube-scheduler \
+  --kubeconfig=${KUBE_CONFIG}
 
 kubectl config use-context default --kubeconfig=${KUBE_CONFIG}
-
-````
+```
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667393623329-96e20e19-5693-428f-8a33-74c846ba9633.png)
 
-<h4 id="DppV0">3.5.3 Scheduler配置文件</h4>
+#### 3.5.3 Scheduler 配置文件
+
 ```bash
 cat > /opt/kubernetes/cfg/kube-scheduler.conf << EOF
 KUBE_SCHEDULER_OPTS="--logtostderr=false \\
@@ -866,14 +887,15 @@ KUBE_SCHEDULER_OPTS="--logtostderr=false \\
 --kubeconfig=/opt/kubernetes/cfg/kube-scheduler.kubeconfig \\
 --bind-address=127.0.0.1"
 EOF
-````
+```
 
 ```bash
 •--kubeconfig：连接apiserver配置文件
 •--leader-elect：当该组件启动多个时，自动选举（HA）
 ```
 
-<h4 id="ysb40">3.5.4 systemd管理Scheduler</h4>
+#### 3.5.4 systemd 管理 Scheduler
+
 ```bash
 cat > /etc/systemd/system/kube-scheduler.service << EOF
 [Unit]
@@ -890,18 +912,18 @@ WantedBy=multi-user.target
 EOF
 
 # 启动并设置开机启动
-
 systemctl daemon-reload
 systemctl restart kube-scheduler
 systemctl enable kube-scheduler
 systemctl status kube-scheduler
-
-````
+```
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667393741067-df53f9c8-b2cc-41bd-9b79-de905e746b7e.png)
 
-<h3 id="KQ5X9">3.6 Kubectl</h3>
-<h4 id="RHyBd">3.6.1 签发kubectl连接集群证书</h4>
+### 3.6 Kubectl
+
+#### 3.6.1 签发 kubectl 连接集群证书
+
 ```json
 cd ~/TLS/k8s
 
@@ -927,9 +949,10 @@ EOF
 
 # 生成证书
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes admin-csr.json | cfssljson -bare admin
-````
+```
 
-<h4 id="H1kYS">3.6.2 生成Kubeconfig文件</h4>
+#### 3.6.2 生成 Kubeconfig 文件
+
 ```bash
 mkdir /root/.kube
 
@@ -937,29 +960,29 @@ KUBE_CONFIG="/root/.kube/config"
 KUBE_APISERVER="https://192.168.124.21:6443"
 
 kubectl config set-cluster kubernetes \
- --certificate-authority=/opt/kubernetes/ssl/ca.pem \
- --embed-certs=true \
- --server=${KUBE_APISERVER} \
+  --certificate-authority=/opt/kubernetes/ssl/ca.pem \
+  --embed-certs=true \
+  --server=${KUBE_APISERVER} \
   --kubeconfig=${KUBE_CONFIG}
 
 kubectl config set-credentials cluster-admin \
- --client-certificate=./admin.pem \
- --client-key=./admin-key.pem \
- --embed-certs=true \
- --kubeconfig=${KUBE_CONFIG}
+  --client-certificate=./admin.pem \
+  --client-key=./admin-key.pem \
+  --embed-certs=true \
+  --kubeconfig=${KUBE_CONFIG}
 
 kubectl config set-context default \
- --cluster=kubernetes \
- --user=cluster-admin \
- --kubeconfig=${KUBE_CONFIG}
+  --cluster=kubernetes \
+  --user=cluster-admin \
+  --kubeconfig=${KUBE_CONFIG}
 
 kubectl config use-context default --kubeconfig=${KUBE_CONFIG}
-
-````
+```
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667393994357-e3a2e27c-5191-448d-89a7-95dded82e66c.png)
 
-<h4 id="ufDuw">3.6.3 通过kubectl查看集群组件状态</h4>
+#### 3.6.3 通过 kubectl 查看集群组件状态
+
 ```bash
 [root@master1 k8s]# kubectl get cs
 Warning: v1 ComponentStatus is deprecated in v1.19+
@@ -967,21 +990,24 @@ NAME                 STATUS    MESSAGE                         ERROR
 scheduler            Healthy   ok
 controller-manager   Healthy   ok
 etcd-0               Healthy   {"health":"true","reason":""}
-````
+```
 
 如上说明所有 Master 节点组件正常
 
-<h4 id="dhzIz">3.6.4  <font style="color:rgb(0,0,0);">授权kubelet-bootstrap用户允许请求证书</font></h4>
+#### 3.6.4 <font style="color:rgb(0,0,0);">授权 kubelet-bootstrap 用户允许请求证书</font>
+
 ```bash
 kubectl create clusterrolebinding kubelet-bootstrap \
 --clusterrole=system:node-bootstrapper \
 --user=kubelet-bootstrap
 ```
 
-<h3 id="toD2H">3.7 Kubelet</h3>
-如下操作还在Master节点操作，同时作为Worker Node节点
+### 3.7 Kubelet
 
-<h4 id="hpDxk">3.7.1 <font style="color:rgb(0,0,0);">配置参数文件</font></h4>
+如下操作还在 Master 节点操作，同时作为 Worker Node 节点
+
+#### 3.7.1 <font style="color:rgb(0,0,0);">配置参数文件</font>
+
 ```yaml
 cat > /opt/kubernetes/cfg/kubelet-config.yml << EOF
 kind: KubeletConfiguration
@@ -992,7 +1018,7 @@ readOnlyPort: 10255
 cgroupDriver: cgroupfs
 clusterDNS:
 - 10.0.0.2
-clusterDomain: cluster.local 
+clusterDomain: cluster.local
 failSwapOn: false
 authentication:
   anonymous:
@@ -1001,7 +1027,7 @@ authentication:
     cacheTTL: 2m0s
     enabled: true
   x509:
-    clientCAFile: /opt/kubernetes/ssl/ca.pem 
+    clientCAFile: /opt/kubernetes/ssl/ca.pem
 authorization:
   mode: Webhook
   webhook:
@@ -1017,34 +1043,34 @@ maxPods: 110
 EOF
 ```
 
-<h4 id="HJaYw">3.7.2 生成kubelet初次加入集群引导kubeconfig文件</h4>
+#### 3.7.2 生成 kubelet 初次加入集群引导 kubeconfig 文件
+
 ```bash
 KUBE_CONFIG="/opt/kubernetes/cfg/bootstrap-kubelet.kubeconfig"
 KUBE_APISERVER="https://192.168.124.21:6443" # apiserver IP:PORT
 TOKEN="c47ffb939f5ca36231d9e3121a252940" # 与token.csv里保持一致
 
 # 生成 kubelet bootstrap kubeconfig 配置文件
-
 kubectl config set-cluster kubernetes \
- --certificate-authority=/opt/kubernetes/ssl/ca.pem \
- --embed-certs=true \
- --server=${KUBE_APISERVER} \
+  --certificate-authority=/opt/kubernetes/ssl/ca.pem \
+  --embed-certs=true \
+  --server=${KUBE_APISERVER} \
   --kubeconfig=${KUBE_CONFIG}
 
 kubectl config set-credentials "kubelet-bootstrap" \
- --token=${TOKEN} \
+  --token=${TOKEN} \
   --kubeconfig=${KUBE_CONFIG}
 
 kubectl config set-context default \
- --cluster=kubernetes \
- --user="kubelet-bootstrap" \
- --kubeconfig=${KUBE_CONFIG}
+  --cluster=kubernetes \
+  --user="kubelet-bootstrap" \
+  --kubeconfig=${KUBE_CONFIG}
 
 kubectl config use-context default --kubeconfig=${KUBE_CONFIG}
+```
 
-````
+#### 3.7.3 systemd 管理 Kubelet
 
-<h4 id="FZ85O">3.7.3 systemd管理Kubelet</h4>
 ```bash
 cat > /etc/systemd/system/kubelet.service << EOF
 [Unit]
@@ -1075,7 +1101,7 @@ systemctl daemon-reload
 systemctl restart kubelet
 systemctl enable kubelet
 systemctl status kubelet
-````
+```
 
 ```yaml
 •--hostname-override：显示名称，集群中唯一
@@ -1087,7 +1113,8 @@ systemctl status kubelet
 •--pod-infra-container-image：管理Pod网络容器的镜像
 ```
 
-<h4 id="kxNwH">3.7.4 <font style="color:rgb(0,0,0);">批准kubelet证书申请并加入集群</font></h4>
+#### 3.7.4 <font style="color:rgb(0,0,0);">批准 kubelet 证书申请并加入集群</font>
+
 ```bash
 # 查看kubelet证书请求
 [root@master1 k8s]# kubectl get csr
@@ -1095,24 +1122,23 @@ NAME                                                   AGE   SIGNERNAME         
 node-csr-guKp4GT08iDuBUXBnfteEGA0-2klqrY3sB46P5xYeJs   11s   kubernetes.io/kube-apiserver-client-kubelet   kubelet-bootstrap   <none>              Pending
 
 # 批准申请
-
 [root@master1 k8s]# kubectl certificate approve node-csr-guKp4GT08iDuBUXBnfteEGA0-2klqrY3sB46P5xYeJs
 certificatesigningrequest.certificates.k8s.io/node-csr-guKp4GT08iDuBUXBnfteEGA0-2klqrY3sB46P5xYeJs approved
 
 # 查看节点
-
 [root@master1 k8s]# kubectl get node
-NAME STATUS ROLES AGE VERSION
-k8s-master NotReady <none> 3s v1.24.7
-
-````
+NAME         STATUS     ROLES    AGE   VERSION
+k8s-master   NotReady   <none>   3s    v1.24.7
+```
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667717909532-d5f16e01-1089-4739-88f5-cae2b27f7d5c.png)
 
 <font style="color:rgb(0,0,0);">注：由于网络插件还没有部署，节点会没有准备就绪 NotReady</font>
 
-<h3 id="SpGwM"><font style="color:rgb(0,0,0);">3.8 Kube-Proxy</font></h3>
-<h4 id="D0arL">3.8.1 Kube-Proxy配置文件</h4>
+### <font style="color:rgb(0,0,0);">3.8 Kube-Proxy</font>
+
+#### 3.8.1 Kube-Proxy 配置文件
+
 ```bash
 cat > /opt/kubernetes/cfg/kube-proxy.conf << EOF
 KUBE_PROXY_OPTS="--logtostderr=false \\
@@ -1120,9 +1146,10 @@ KUBE_PROXY_OPTS="--logtostderr=false \\
 --log-dir=/opt/kubernetes/logs \\
 --config=/opt/kubernetes/cfg/kube-proxy-config.yml"
 EOF
-````
+```
 
-<h4 id="n1paS">3.8.2 配置文件参数</h4>
+#### 3.8.2 配置文件参数
+
 ```yaml
 cat > /opt/kubernetes/cfg/kube-proxy-config.yml << EOF
 kind: KubeProxyConfiguration
@@ -1141,37 +1168,37 @@ iptables:
 EOF
 ```
 
-<h4 id="yCObu">3.8.3 签发Kube-Proxy证书</h4>
+#### 3.8.3 签发 Kube-Proxy 证书
+
 ```bash
 cd ~/TLS/k8s
 
 cat > kube-proxy-csr.json << EOF
 {
-"CN": "system:kube-proxy",
-"hosts": [],
-"key": {
-"algo": "rsa",
-"size": 2048
-},
-"names": [
-{
-"C": "CN",
-"L": "BeiJing",
-"ST": "BeiJing",
-"O": "k8s",
-"OU": "System"
-}
-]
+  "CN": "system:kube-proxy",
+  "hosts": [],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "L": "BeiJing",
+      "ST": "BeiJing",
+      "O": "k8s",
+      "OU": "System"
+    }
+  ]
 }
 EOF
 
 # 生成证书
-
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes kube-proxy-csr.json | cfssljson -bare kube-proxy
+```
 
-````
+#### 3.8.4 <font style="color:rgb(0,0,0);">生成 kube-proxy.kubeconfig 文件</font>
 
-<h4 id="WVtom">3.8.4 <font style="color:rgb(0,0,0);">生成kube-proxy.kubeconfig文件</font></h4>
 ```bash
 KUBE_CONFIG="/opt/kubernetes/cfg/kube-proxy.kubeconfig"
 KUBE_APISERVER="https://192.168.124.21:6443"
@@ -1194,9 +1221,10 @@ kubectl config set-context default \
   --kubeconfig=${KUBE_CONFIG}
 
 kubectl config use-context default --kubeconfig=${KUBE_CONFIG}
-````
+```
 
-<h4 id="S551a">3.8.5 systemd管理Kube-Proxy</h4>
+#### 3.8.5 systemd 管理 Kube-Proxy
+
 ```bash
 cat > /etc/systemd/system/kube-proxy.service << EOF
 [Unit]
@@ -1214,15 +1242,14 @@ WantedBy=multi-user.target
 EOF
 
 # 启动并设置开机启动
-
 systemctl daemon-reload
 systemctl restart kube-proxy
 systemctl enable kube-proxy
 systemctl status kube-proxy
+```
 
-````
+#### 3.8.6 添加 node 节点
 
-<h4 id="HgtMc">3.8.6 添加node节点</h4>
 ```bash
 # 将文件和证书复制到node节点
 scp /opt/kubernetes/bin/kube{let,-proxy} root@k8s-node1:/opt/kubernetes/bin
@@ -1241,9 +1268,10 @@ scp /etc/systemd/system/kube{let*,-proxy*} root@k8s-node2:/etc/systemd/system
 systemctl start kubelet kube-proxy
 systemctl enable kubelet kube-proxy
 systemctl status kubelet kube-proxy
-````
+```
 
-<h4 id="kwdgZ">3.8.7 批准node节点的证书申请</h4>
+#### 3.8.7 批准 node 节点的证书申请
+
 ```bash
 kubectl certificate approve node-csr-zZh4jz9iFeJQp_brVPVA_oStyEZCrRA6I0rYbGJThY0
 kubectl certificate approve  node-csr-eOUgX4kAnvZ96kTRPZQAdQY7x8m2UoSXAHc7aW7WhHg
@@ -1253,27 +1281,30 @@ kubectl certificate approve  node-csr-eOUgX4kAnvZ96kTRPZQAdQY7x8m2UoSXAHc7aW7WhH
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667973904124-90b43ff0-3c41-4310-a94b-9c6c303ad4d8.png)
 
-<h3 id="W0u7W">3.9 CNI网络插件Calico</h3>
-<h4 id="wPL0b">3.9.1 下载calico</h4>
+### 3.9 CNI 网络插件 Calico
+
+#### 3.9.1 下载 calico
+
 ```bash
 wget https://docs.projectcalico.org/manifests/calico.yaml --no-check-certificate
 
-# 将 CALICO_IPV4POOL_CIDR 参数注释取消，并修改 ip 地址段为上面的 cluster-cidr 地址
-
+# 将CALICO_IPV4POOL_CIDR参数注释取消，并修改ip地址段为上面的cluster-cidr地址
 - name: CALICO_IPV4POOL_CIDR
   value: "10.1.0.0/16"
-
-````
+```
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667718904229-21043ba7-0167-455f-9079-c4bd2f9b832b.png)
 
-<h4 id="cUzfQ">3.9.2 通过yaml文件部署calico</h4>
+#### 3.9.2 通过 yaml 文件部署 calico
+
 ```bash
 [root@master1 TLS]# kubectl apply -f calico.yaml
-````
+```
 
-<h4 id="arrcc">![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667975355984-8461cc1c-a5e4-4c77-8475-ee18d40a78c4.png)</h4>
-<h4 id="ftBLQ">3.9.3 授权apiserver访问kubelet</h4>
+#### ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1667975355984-8461cc1c-a5e4-4c77-8475-ee18d40a78c4.png)
+
+#### 3.9.3 授权 apiserver 访问 kubelet
+
 ```yaml
 cat > apiserver-to-kubelet-rbac.yaml << EOF
 apiVersion: rbac.authorization.k8s.io/v1
@@ -1313,11 +1344,4 @@ subjects:
 EOF
 
 kubectl apply -f apiserver-to-kubelet-rbac.yaml
-
-```
-
-
-
-
-
 ```
