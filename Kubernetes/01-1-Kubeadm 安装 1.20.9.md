@@ -1,34 +1,42 @@
-<h2 id="Jnjti">1、环境准备</h2>
-| **<font style="color:rgb(79, 79, 79);">操作系统</font>** | **<font style="color:rgb(79, 79, 79);">IP地址</font>** | **<font style="color:rgb(79, 79, 79);">角色</font>** | **<font style="color:rgb(79, 79, 79);">硬盘</font>** | **<font style="color:rgb(79, 79, 79);">CPU & MEM</font>** |
-| <font style="color:rgb(79, 79, 79);">Centos 7.9</font> | 172.16.1.22 | <font style="color:rgb(79, 79, 79);">k8s-master</font> | <font style="color:rgb(79, 79, 79);">50GB</font> | <font style="color:rgb(79, 79, 79);">2核4G</font> |
-| <font style="color:rgb(79, 79, 79);">Centos 7.9</font> | 172.16.1.23 | <font style="color:rgb(79, 79, 79);">k8s-node</font> | <font style="color:rgb(79, 79, 79);">50GB</font> | <font style="color:rgb(79, 79, 79);">4核10G</font> |
+## 一、环境准备
 
-<h2 id="Tsgzr"><font style="color:rgb(79, 79, 79);">2、系统初始化</font></h2>
-<h3 id="WNKcJ">2.1 关闭防火墙</h3>
+| **<font style="color:rgb(79, 79, 79);">操作系统</font>** | **<font style="color:rgb(79, 79, 79);">IP 地址</font>** |  **<font style="color:rgb(79, 79, 79);">角色</font>**  | **<font style="color:rgb(79, 79, 79);">硬盘</font>** | **<font style="color:rgb(79, 79, 79);">CPU & MEM</font>** |
+| :------------------------------------------------------: | ------------------------------------------------------- | :----------------------------------------------------: | :--------------------------------------------------: | :-------------------------------------------------------: |
+|  <font style="color:rgb(79, 79, 79);">Centos 7.9</font>  | 172.16.1.22                                             | <font style="color:rgb(79, 79, 79);">k8s-master</font> |   <font style="color:rgb(79, 79, 79);">50GB</font>   |    <font style="color:rgb(79, 79, 79);">2 核 4G</font>    |
+|  <font style="color:rgb(79, 79, 79);">Centos 7.9</font>  | 172.16.1.23                                             |  <font style="color:rgb(79, 79, 79);">k8s-node</font>  |   <font style="color:rgb(79, 79, 79);">50GB</font>   |   <font style="color:rgb(79, 79, 79);">4 核 10G</font>    |
+
+## <font style="color:rgb(79, 79, 79);">二、系统初始化</font>
+
+### 2.1 关闭防火墙
+
 ```bash
 systemctl stop firewalld
 systemctl disable firewalld
 ```
 
-<h3 id="E3VVh">2.2 关闭SELINUX</h3>
+### 2.2 关闭 SELINUX
+
 ```bash
 setenforce 0
 sed -ri 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 ```
 
-<h3 id="Nb2li">2.3 关闭swap分区</h3>
+### 2.3 关闭 swap 分区
+
 ```bash
 swapoff -a
 sed -ri 's/.*swap.*/#&/' /etc/fstab
 ```
 
-<h3 id="nPdB9">2.4 规划主机名</h3>
+### 2.4 规划主机名
+
 ```bash
 hostnamctl set-hostname k8s-master
 hostnamctl set-hostname k8s-node
 ```
 
-<h3 id="bbc8H">2.5 在Master中添加host信息</h3>
+### 2.5 在 Master 中添加 host 信息
+
 ```bash
 cat >>/etc/hosts<<-EOF
 172.16.1.22 k8s-master
@@ -36,7 +44,8 @@ cat >>/etc/hosts<<-EOF
 EOF
 ```
 
-<h3 id="ucNwy">2.6 <font style="color:rgb(35, 38, 59);">将桥接的流量传递到iptables链</font></h3>
+### 2.6 <font style="color:rgb(35, 38, 59);">将桥接的流量传递到 iptables 链</font>
+
 ```bash
 cat >> /etc/sysctl.d/k8s.conf << EOF
 net.bridge.bridge-nf-call-ip6tables = 1
@@ -44,34 +53,32 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
 
 sysctl --system
+```
 
-````
+### 2.7 时间同步
 
-<h3 id="DtPVk">2.7 时间同步</h3>
 ```bash
 yum install ntpdate -y
 ntpdate ntp.aliyun.com
-````
+```
 
-<h3 id="o5Txe">2.8 升级内核 (升到3.10以上)</h3>
+### 2.8 升级内核 (升到 3.10 以上)
+
 ```bash
 # 导入ELRepo仓库的公共密钥
 rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
 
-# 安装 ELRepo 仓库的 yum 源
-
+# 安装ELRepo仓库的yum源
 yum install https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm
 
 # 下载新版本内核并安装
-
 yum --enablerepo=elrepo-kernel install kernel-ml
 
 # 查看当前可用的内核
-
 [root@centos7-1 ~]# cat /boot/grub2/grub.cfg |grep menuentry
 if [ x"${feature_menuentry_id}" = xy ]; then
-menuentry_id_option="--id"
-menuentry_id_option=""
+  menuentry_id_option="--id"
+  menuentry_id_option=""
 export menuentry_id_option
 menuentry 'CentOS Linux (5.9.12-1.el7.elrepo.x86_64) 7 (Core)' --class centos --class gnu-linux --class gnu --class os --unrestricted $menuentry_id_option 'gnulinux-3.10.0-693.el7.x86_64-advanced-49d5f3be-6a5c-420d-a05d-04966bf511d5' {
 menuentry 'CentOS Linux (3.10.0-1160.6.1.el7.x86_64) 7 (Core)' --class centos --class gnu-linux --class gnu --class os --unrestricted $menuentry_id_option 'gnulinux-3.10.0-693.el7.x86_64-advanced-49d5f3be-6a5c-420d-a05d-04966bf511d5' {
@@ -79,30 +86,31 @@ menuentry 'CentOS Linux (3.10.0-693.el7.x86_64) 7 (Core)' --class centos --class
 menuentry 'CentOS Linux (0-rescue-f7f91fc5ff134e879b63da7cb445a1ec) 7 (Core)' --class centos --class gnu-linux --class gnu --class os --unrestricted $menuentry_id_option 'gnulinux-0-rescue-f7f91fc5ff134e879b63da7cb445a1ec-advanced-49d5f3be-6a5c-420d-a05d-04966bf511d5' {
 
 # 设置开机时默认启动的内核
-
 grub2-set-default 'CentOS Linux (5.9.12-1.el7.elrepo.x86_64) 7 (Core)'
 
 # 重启系统
-
 reboot
+```
 
-````
+## 三、安装 Docker
 
-<h2 id="yAPwM">三、安装Docker</h2>
-<h3 id="vVqRD">3.1 添加阿里镜像源</h3>
+### 3.1 添加阿里镜像源
+
 ```bash
 yum install -y yum-utils
 yum-config-manager \
 --add-repo \
 http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-````
+```
 
-<h3 id="D1nlW">3.2 安装Docker</h3>
+### 3.2 安装 Docker
+
 ```bash
 yum install -y docker-ce-20.10.7 docker-ce-cli-20.10.7  containerd.io-1.4.6
 ```
 
-<h3 id="zthVS">3.3 修改配置文件</h3>
+### 3.3 修改配置文件
+
 ```bash
 mkdir -p /etc/docker
 cat /etc/docker/daemon.json <<-EOF
@@ -119,17 +127,19 @@ EOF
 
 systemctl daemon-reload
 systemctl restart docker
+```
 
-````
+### 3.4 启动 docker
 
-<h3 id="xA8IU">3.4 启动docker</h3>
 ```bash
 systemctl start docker
 systemctl enable docker
-````
+```
 
-<h2 id="crZcN">四、安装Kubernetes</h2>
-<h3 id="oeeuy">4.1 设置k8s源</h3>
+## 四、安装 Kubernetes
+
+### 4.1 设置 k8s 源
+
 ```bash
 cat >>/etc/yum.repos.d/kubernetes.repo<<-EOF
 [kubernetes]
@@ -144,13 +154,15 @@ exclude=kubelet kubeadm kubectl
 EOF
 ```
 
-<h3 id="gDPQq">4.2 安装kubeadm、kubelet、kubectl</h3>
+### 4.2 安装 kubeadm、kubelet、kubectl
+
 ```bash
 yum install -y kubelet-1.20.9 kubeadm-1.20.9 kubectl-1.20.9
 systemctl enable kubelet
 ```
 
-<h3 id="LK7UI">4.3 初始化集群</h3>
+### 4.3 初始化集群
+
 ```bash
 kubeadm init \
 --apiserver-advertise-address=172.16.1.22 \
@@ -159,21 +171,22 @@ kubeadm init \
 --service-cidr=172.168.0.0/16 \
 --pod-network-cidr=172.169.0.0/16
 
-# service-cidr: 自定义 ip 网段，需和 pod-network-cidr 区分开
+# service-cidr: 自定义ip网段，需和pod-network-cidr区分开
+```
 
-````
+### 4.4 根据提示进行对应的操作
 
-<h3 id="L4P8v">4.4 根据提示进行对应的操作</h3>
 ```bash
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 export KUBECONFIG=/etc/kubernetes/admin.conf
-````
+```
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1660719143303-b9a8da31-28ff-4350-9522-317d43d516b6.png)
 
-<h3 id="FT5RM">4.5 将Node节点加入集群</h3>
+### 4.5 将 Node 节点加入集群
+
 ```bash
 kubeadm join 172.16.1.22:6443 --token b1i1am.ge03qxdqhbfmkd5g \
     --discovery-token-ca-cert-hash sha256:f0f6f94bda3190a29f2b4fa3995503f00a7e93cc3fb5ec2b73c7b39460a8373e
@@ -181,14 +194,16 @@ kubeadm join 172.16.1.22:6443 --token b1i1am.ge03qxdqhbfmkd5g \
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1660719257957-863c7269-b4a8-4c5b-bc1c-4ddc884ab570.png)
 
-<h3 id="KWBlu">4.6 查看集群节点</h3>
+### 4.6 查看集群节点
+
 ```bash
 kubectl get node
 ```
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1660719295250-be5c5dfc-5877-4d6b-b5eb-37980e654a6d.png)
 
-<h3 id="Wt3uV">4.7 安装CNI网络插件 Calico</h3>
+### 4.7 安装 CNI 网络插件 Calico
+
 ```bash
 kubectl apply -f calico.yaml
 ```
@@ -4274,7 +4289,8 @@ metadata:
 
 ![](https://cdn.nlark.com/yuque/0/2022/png/29476003/1660720816389-b45ac2dd-b7eb-44a2-834b-455fd65ba59b.png)
 
-<h3 id="g1Qzu">4.8 安装Kuboard</h3>
+### 4.8 安装 Kuboard
+
 ```bash
 docker run -d \
   --restart=unless-stopped \
