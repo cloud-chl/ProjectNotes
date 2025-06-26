@@ -197,7 +197,7 @@ def getDataByConfig(token, api_path, fields_config, page_size, data_type_name):
 
 # 获取流批数据
 def getStreamTaskData(token):
-    api_path = "/snc-platform-manager/streamingWorkflow/pageList"
+    api_path = "/api/v1/login/pageList"
     fields_config = {"任务名称": "name", "状态": "status", "重要等级": "level"}
     page_size = 20
     data_type_name = "api数据"
