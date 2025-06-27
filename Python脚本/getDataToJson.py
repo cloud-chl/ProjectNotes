@@ -1,6 +1,9 @@
 import requests
 import json
 import datetime
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 url = "http://192.168.1.1:8080"
 # 账号
