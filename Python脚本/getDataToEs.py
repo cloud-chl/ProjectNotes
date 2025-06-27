@@ -2,6 +2,9 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 import datetime
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # 平台连接信息
 url = "http://192.168.1.1:8080"
