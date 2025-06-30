@@ -12,8 +12,9 @@ username = "admin"
 password = "admin@123"
 
 # ES连接信息
+CURRENT_TIME = datetime.datetime.now().strftime("%Y%m")
 ES_URL = "http://192.168.1.1:9200"
-ES_INDEX = "index_name"
+ES_INDEX = "index_name_" + CURRENT_TIME
 ES_USER = "elastic"
 ES_PASS = "elastic@123"
 
