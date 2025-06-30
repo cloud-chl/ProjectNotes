@@ -15,7 +15,7 @@ SERVICE_PORT=9000
 # 服务启动脚本
 SH_FILE=clickhouse.sh
 # 服务启动命令
-$START_COMMAND="$SERVICE_BIN --config-file $SERVICE_CONF --pid-file ${SERVICE_PATH}/logs/clickhouse-server.pid --daemon"
+START_COMMAND="$SERVICE_BIN --config-file $SERVICE_CONF --pid-file ${SERVICE_PATH}/logs/clickhouse-server.pid --daemon"
 
 # 获取进程数量
 get_process_count() {
