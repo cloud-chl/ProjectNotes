@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import requests
 from requests.auth import HTTPBasicAuth
 import json
@@ -12,11 +13,12 @@ username = "admin"
 password = "admin@123"
 
 # ES连接信息
-CURRENT_TIME = datetime.datetime.now().strftime("%Y%m")
-ES_URL = "http://192.168.1.1:9200"
-ES_INDEX = "index_name_" + CURRENT_TIME
+CURRENT_MONTH = datetime.datetime.now().strftime("%Y%m")
+# ES_URL = "http://192.168.33.225:9200"
+ES_URL = "https://es-cn-s114ar5vh0007f22o.elasticsearch.aliyuncs.com:9200"
+ES_INDEX = "alarms_" + CURRENT_MONTH
 ES_USER = "elastic"
-ES_PASS = "elastic@123"
+ES_PASS = "Elastic#9200"
 
 
 # 获取Token
@@ -209,18 +211,42 @@ def getDataByConfig(token, api_path, fields_config, page_size, data_type_name):
 
 # 获取流批数据
 def getStreamTaskData(token):
-    api_path = "/v1/api/"
+    api_path = "/api/v1/listpage"
     fields_config = {
         "任务ID": "id",
         "任务名称": "name",
         "状态": "status",
-        "任务等级": "level",
-        "异常信息": "errCause",
+        "重要等级": "level",
+        "启动时间": "startTime",
+        "最新数据": "lastProcessTime",
+        "更新用户": "updateUserName",
+        "更新时间": "updateTime",
+        "备注": "description",
     }
     page_size = 50
-    data_type_name = "API数据"
+    data_type_name = "流批数据"
 
     return getDataByConfig(token, api_path, fields_config, page_size, data_type_name)
+
+
+# 写入文件函数
+def write_to_file(content, filename=None):
+    if filename is None:
+        # 生成带时间戳的文件名
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"流批数据_{timestamp}.json"
+
+    try:
+        with open(filename, "w", encoding="utf-8") as f:
+            if isinstance(content, str):
+                f.write(content)
+            else:
+                json.dump(content, f, ensure_ascii=False, indent=2)
+        print(f"数据已保存到文件: {filename}")
+        return filename
+    except Exception as e:
+        print(f"写入文件失败: {e}")
+        return None
 
 
 def write_to_es(taskId, taskName, taskStatus, typeName, taskContent):
@@ -236,38 +262,98 @@ def write_to_es(taskId, taskName, taskStatus, typeName, taskContent):
 
         # 判断是否为异常状态
         is_abnormal = False
-        if typeName == "API任务" and status_int != 1:
+        if typeName == "api接口数据采集任务" and status_int == 2:
             is_abnormal = True
 
         if is_abnormal:
-            # 异常状态，写入新记录
-            alarm_data = {
-                "firstAlarm": True,
-                "firstAlarmTime": timestamp,
-                "alarmId": alarm_id,
-                "alarmName": f"{taskId}_{taskName}_{typeName} 采集异常，异常信息：{taskContent}",
-                "alarmContent": f"{taskId}_{taskName}_{typeName} 采集异常，异常信息：{taskContent}",
-                "status": 1,
-            }
+            # 异常状态，先查询ES中是否存在该alarmId的记录
+            query_url = f"{ES_URL}/{ES_INDEX}/_doc/{alarm_id}"
 
-            # 构造请求URL - 使用alarmId作为文档ID
-            url = f"{ES_URL}/{ES_INDEX}/_doc/{alarm_id}"
+            try:
+                query_response = requests.get(
+                    query_url,
+                    auth=HTTPBasicAuth(ES_USER, ES_PASS),
+                    headers={"Content-Type": "application/json"},
+                    timeout=30,
+                )
 
-            # 发送POST请求写入数据
-            response = requests.post(
-                url,
-                auth=HTTPBasicAuth(ES_USER, ES_PASS),
-                headers={"Content-Type": "application/json"},
-                data=json.dumps(alarm_data),
-                timeout=30,
-            )
+                if query_response.status_code == 200:
+                    # 记录存在，更新字段
+                    existing_data = query_response.json()
+                    source_data = existing_data.get("_source", {})
 
-            # 输出结果
-            print(f"写入ES状态码: {response.status_code}")
-            if response.status_code == 201:
-                print(f"成功写入ES告警: {alarm_id}")
-            else:
-                print(f"写入ES失败: {response.text}")
+                    # 更新字段
+                    update_data = {
+                        "doc": {
+                            "firstAlarm": False,  # 不是首次告警
+                            "status": 1,  # 告警状态
+                            "alarmTime": timestamp,  # 更新告警时间
+                        }
+                    }
+
+                    # 构造_update请求URL
+                    update_url = f"{ES_URL}/{ES_INDEX}/_update/{alarm_id}"
+
+                    update_response = requests.post(
+                        update_url,
+                        auth=HTTPBasicAuth(ES_USER, ES_PASS),
+                        headers={"Content-Type": "application/json"},
+                        data=json.dumps(update_data),
+                        timeout=30,
+                    )
+
+                    print(f"更新ES状态码: {update_response.status_code}")
+                    if update_response.status_code == 200:
+                        print(f"成功更新ES告警记录: {alarm_id}")
+                    else:
+                        print(f"更新ES失败: {update_response.text}")
+                        return False
+
+                elif query_response.status_code == 404:
+                    # 记录不存在，插入新记录
+                    alarm_data = {
+                        "firstAlarm": True,
+                        "firstAlarmTime": timestamp,
+                        "alarmId": alarm_id,
+                        "globalAlarmId": alarm_id,
+                        "alarmName": f"{typeName} 异常, 任务名称:{taskName}, 异常信息：{taskContent}",
+                        "alarmContent": f"{typeName} 异常, 任务名称:{taskName}, 异常信息：{taskContent}",
+                        "priorityId": 3,
+                        "priorityName": "一般",
+                        "alarmTime": timestamp,
+                        "status": 1,
+                        "resourceName": "统一登录平台",
+                        "metricName": "service_monitor",
+                        "metricCode": "service_monitor",
+                        "value": "0",
+                        "count": 1,
+                    }
+
+                    # 构造请求URL - 使用alarmId作为文档ID
+                    url = f"{ES_URL}/{ES_INDEX}/_doc/{alarm_id}"
+
+                    # 发送POST请求写入数据
+                    response = requests.post(
+                        url,
+                        auth=HTTPBasicAuth(ES_USER, ES_PASS),
+                        headers={"Content-Type": "application/json"},
+                        data=json.dumps(alarm_data),
+                        timeout=30,
+                    )
+
+                    # 输出结果
+                    print(f"写入ES状态码: {response.status_code}")
+                    if response.status_code == 201:
+                        print(f"成功写入ES告警: {alarm_id}")
+                    else:
+                        print(f"写入ES失败: {response.text}")
+                        return False
+                else:
+                    print(f"查询ES记录失败, 状态码: {query_response.status_code}")
+                    return False
+
+            except Exception as e:
+                print(f"查询ES记录异常: {e}")
                 return False
 
         else:
@@ -294,7 +380,7 @@ def write_to_es(taskId, taskName, taskStatus, typeName, taskContent):
             if update_response.status_code == 200:
                 print(f"成功更新ES记录: {alarm_id}")
             elif update_response.status_code == 404:
-                print(f"ES记录不存在，无需更新: {alarm_id}")
+                print(f"ES记录不存在, 无需更新: {alarm_id}")
             else:
                 print(f"更新ES失败: {update_response.text}")
                 return False
@@ -307,20 +393,22 @@ def write_to_es(taskId, taskName, taskStatus, typeName, taskContent):
 
 
 if __name__ == "__main__":
-
+    # 生成时间戳
+    # timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     # 获取Token
     token = getToken()
     # print(f"获取到的Token: {token}")
 
-    # 获取API数据
-    print("\n=== API数据 ===")
+    # 获取流批数据
+    print("\n=== 采集数据 ===")
     stream_data = getStreamTaskData(token)
     if stream_data:
+        # stream_filename = f"流批数据_{timestamp}.json"
+        # write_to_file(stream_data, stream_filename)
         for record in stream_data:
             task_id = record.get("任务ID", "")
-            task_name = record.get("任务名称", "")
-            task_status = record.get("任务状态", "")
-            task_errcause = record.get("异常信息", "")
-            write_to_es(task_id, task_name, task_status, "API任务", task_errcause)
+            task_name = record.get("流程名称", "")
+            task_status = record.get("状态", "")
+            write_to_es(task_id, task_name, task_status, "采集任务", "null")
     else:
-        print("数据获取失败")
+        print("api数据获取失败")
