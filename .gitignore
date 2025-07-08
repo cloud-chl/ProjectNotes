@@ -1,0 +1,75 @@
+# 项目忽略文件配置
+
+# 日志文件
+log.md
+*.log
+
+# 规则文件
+.cursor/rules/
+*.mdc
+
+# Python相关
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 虚拟环境
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE相关
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# 配置文件（包含敏感信息）
+*.conf
+*.config
+config.ini
+settings.ini
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+*.7z 
