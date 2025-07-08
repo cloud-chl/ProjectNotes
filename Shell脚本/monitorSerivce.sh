@@ -1,8 +1,5 @@
 #!/bin/bash
 # 用途： 用于监听中间件状态，异常直接重启
-# 作者： 系统管理员
-# 创建时间： 2025.7
-# 功能： 监控Zookeeper和Kafka服务状态，发现异常时自动重启
 
 # 定义基础路径和日志文件路径
 BASE_PATH=/app
@@ -23,10 +20,10 @@ monitor_service() {
         # 获取值并拆分路径和端口
         # IFS=' ' 设置分隔符为空格，将脚本路径和端口分开
         IFS=' ' read -r script_path service_port <<<"${services_arr[$service_name]}"
-        
+
         # 检查进程数量：统计包含服务名的进程数量
         process_count=$(ps -ef | grep "$service_name" | wc -l)
-        
+
         # 检查端口监听状态：查看指定端口是否有进程在监听
         process_port=$(ss -tlnp | grep ":$service_port")
 
@@ -35,25 +32,25 @@ monitor_service() {
             # 记录服务异常时间
             time=$(date "+%Y-%m-%d %H:%M:%S")
             echo -e "\e[31m$time $service_name is Down.\e[0m" &>>"$LOG_PATH"
-            
+
             # 尝试启动服务
             start_service "$service_name"
-            
+
             # 记录启动过程
             time=$(date "+%Y-%m-%d %H:%M:%S")
             echo -e "\e[31m$time $service_name is Starting...\e[0m" &>>"$LOG_PATH"
-            
+
             # 等待3秒让服务启动
             sleep 3
-            
+
             # 重新检查进程数量（排除grep进程本身）
             new_process_count=$(ps -ef | grep "$service_name" | wc -l)
             # 更精确的进程计数方法：排除grep进程
             new_process_count=$(ps -ef | grep -v grep | grep -c "$service_name")
-            
+
             # 重新检查端口监听状态
             new_process_port=$(ss -tlnp | grep ":$service_port")
-            
+
             # 验证服务是否成功启动
             if [ "$new_process_count" -ge 1 ] && [ -n "$new_process_port" ]; then
                 time=$(date "+%Y-%m-%d %H:%M:%S")
@@ -69,8 +66,8 @@ monitor_service() {
 
 # 启动服务的函数
 start_service() {
-    service=$1  # 接收服务名称参数
-    
+    service=$1 # 接收服务名称参数
+
     # 检查启动脚本是否存在且可执行
     if [ -x "$script_path" ]; then
         # 执行重启命令
@@ -81,16 +78,16 @@ start_service() {
         echo -e "\e[31m$time $service script not found or not executable: $script_path\e[0m" &>>"$LOG_PATH"
         return 1
     fi
-    
+
     # 等待3秒让服务启动
     sleep 3
-    
+
     # 验证服务是否成功启动
     # 使用pgrep统计进程数量（更准确的方法）
     process_count=$(pgrep -c "$service")
     # 检查端口监听状态
     process_port=$(ss -tlnp | grep "$service")
-    
+
     # 如果进程数量大于等于1且端口在监听，则认为启动成功
     if [ "$process_count" -ge 1 ] && [ -n "$process_port" ]; then
         time=$(date "+%Y-%m-%d %H:%M:%S")
