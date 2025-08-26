@@ -7,11 +7,6 @@
 # 备份配置
 mv /etc/ssh{,_old_bak}
 
-# 编译
-./configure --prefix=/usr/local/openssh/ --sysconfdir=/etc/ssh/ --with-openssl-includes=/usr/local/openssl/include/ --with-ssl-dir=/usr/local/openssl/ 
-make
-make install
-
 # 备份
 mv /usr/sbin/sshd{,_old}
 mv /usr/bin/ssh{,_old}
@@ -19,6 +14,16 @@ mv /usr/bin/ssh-add{,_old}
 mv /usr/bin/ssh-agent{,_old}
 mv /usr/bin/ssh-keygen{,_old}
 mv /usr/bin/ssh-keyscan{,_old}
+
+# 编译
+./configure \
+    --prefix=/usr/local/openssh \
+    --sysconfdir=/etc/ssh \
+    --with-ssl-dir=/usr/local/openssl \
+    --with-pam \
+    --with-zlib 
+make
+make install
 
 # 软连接
 ln -s /usr/local/openssh/sbin/sshd /usr/sbin/sshd
@@ -29,8 +34,9 @@ ln -s /usr/local/openssh/bin/ssh-keygen /usr/bin/ssh-keygen
 ln -s /usr/local/openssh/bin/ssh-keyscan /usr/bin/ssh-keyscan
 
 # 修改配置
-sed -ri 's/^#PermitRootLogin/PermitRootLogin yes/' /etc/ssh/sshd_config
-sed -ri 's/^#PasswordAuthentication/PasswordAuthentication yes/' /etc/ssh/sshd_config
+sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+sed -i 's/Type=forking/Type=simple/g' /usr/lib/systemd/system/sshd.service
 
 # 检查配置
  cat /etc/ssh/sshd_config |grep -v ^#|grep -v ^$
