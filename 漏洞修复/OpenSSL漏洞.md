@@ -20,8 +20,8 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$OPENSSL_ROOT_DIR/lib
 
 # 备份
 OPENSSL_ROOT_PATH=/usr/local/openssl
-OPENSSL_PATH=`which openssl`
-mv $OPENSSL_PATH{,_bak_`date +%Y-%m-%d_%H:%M:%S`}
+OPENSSL_PATH=/usr/bin/openssl
+mv $OPENSSL_PATH $OPENSSL_PATH_`date +%Y-%m-%d_%H:%M:%S`
 
 # 软链接到新目录
 ln -sv $OPENSSL_ROOT_PATH/bin/openssl $OPENSSL_PATH
@@ -70,7 +70,7 @@ ldconfig
 ```makefile
 Name:           openssl
 Version:        1.1.1w
-Release:        1%{?dist}
+Release:        %{?dist}
 Summary:        OpenSSL Toolkit
 
 License:        OpenSSL
