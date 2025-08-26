@@ -61,7 +61,7 @@ cp openssh-9.8p1.tar.gz ~/rpmbuild/SOURCES
 ```makefile
 Name:           openssh
 Version:        9.8p1
-Release:        1%{?dist}
+Release:        %{?dist}
 Summary:        OpenSSH compiled with custom OpenSSL
 
 License:        BSD
