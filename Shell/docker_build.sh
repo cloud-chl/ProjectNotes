@@ -16,6 +16,9 @@ dev="${3:-}"
 if [[ "$tag" == "test" && -z "$dev" ]]; then
     dev="test"
     tag=""
+elif [[ "$tag" == "debug" && -z "$dev" ]]; then
+    dev="debug"
+    tag=""
 fi
 
 usage() {
@@ -168,6 +171,8 @@ fi
 
 if [[ "$dev" == "test" ]]; then
     file=Dockerfile_test
+elif [[ "$dev" == "debug" ]]; then
+    file=Dockerfile_debug
 fi
 
 build_info_dir="${base_dir}/.docker_build_info"
