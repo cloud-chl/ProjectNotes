@@ -8,12 +8,11 @@ Agent 离线安装脚本 (Python 2.7 版本)。
 
 import os
 import sys
-import json
 import requests
 import subprocess
 
 # ========== 配置区 ==========
-accessKey = "659a979b395a4ccb9dbfd8bbddc726dc"  # 接口凭证
+accessKey = "UMS_ACCESS_KEY"  # 接口凭证
 proxy_url_gd = "http://10.129.134.27:10031"      # 观达机房代理
 proxy_url_sx = "http://10.129.134.32:10031"      # 沙溪机房代理
 domain = "https://ums-test.gf.com.cn"             # 域名
@@ -226,15 +225,19 @@ def windows_agent_install(proxy_url, domain, install_path, overwrite_enable=Fals
     _makedirs(install_path)
     script_path = os.path.join(install_path, script_name)
 
-    # certutil 下载安装脚本（Windows 原生 HTTPS 下载，无需额外依赖）
+    # 下载安装脚本：用 requests 下载，避免 certutil 被目标机软件限制策略拦截
+    # （WindowsError 786 = ERROR_ACCESS_DISABLED_NO_SAFER_UI_BY_POLICY，
+    #   certutil.exe 常被 SRP/AppLocker 安全基线列入禁用名单）
     print(">>> 下载安装脚本: {}".format(download_url))
-    proc = subprocess.Popen(
-        ["certutil", "-urlcache", "-split", "-f", download_url, script_path],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-    )
-    _, stderr = proc.communicate()
-    if proc.returncode != 0:
-        print(">>> 下载失败: {}".format(stderr))
+    try:
+        resp = requests.get(download_url, timeout=60)
+        if resp.status_code != 200:
+            print(">>> 下载失败: HTTP {}".format(resp.status_code))
+            return False
+        with open(script_path, 'wb') as f:
+            f.write(resp.content)
+    except Exception as e:
+        print(">>> 下载失败: {}".format(e))
         return False
 
     # 执行安装脚本，传入 install_path 参数
@@ -318,15 +321,14 @@ def check_services_running(install_path, max_retries=5, wait_seconds=5):
     return True
 
 
-def _cmdb_post(domain, token, api, data, error_msg="查询CMDB失败"):
+def _cmdb_post(domain, access_token, api, data, error_msg="查询CMDB失败"):
     """CMDB POST 请求通用方法，返回 JSON 或 None"""
     url = "{}/{}".format(domain, api)
     headers = {
         "Content-Type": "application/json",
         "Cache-Control": "no-cache",
         "Accept": "*/*",
-        "access-key": token,
-        "snc-token": token,
+        "access-key": access_token,
     }
     try:
         response = requests.post(url=url, json=data, headers=headers)
@@ -514,108 +516,6 @@ def edit_properties(install_path, properties_path, old_ip, new_ip):
     return True
 
 
-def getToken():
-    # 登录接口
-    loginUrl = domain + "/user/passport/loginCode"
-    username = "agent"
-    password = "BA19bBEN5a+ym7MJxWsndnzpDVRYSuGW7Rjf+7xvrjnVNlBMMYToZhnu0pBzM+4e38Vgw0AzWFd2AEGiprYGEaM5WRLhSbNWNS1kxN+9ef9LpahSRO2+emJGvZe/Nnu8gRRNPchYWhUSPPzBTrfpzH+QJ1Lt2PxCDnGp+PsQJpU="
-
-    # 请求参数
-    dataString = {"params": {"account": username, "password": password}}
-
-    headers = {
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
-    }
-    try:
-        result = requests.post(
-            url=loginUrl, json=dataString, headers=headers, verify=False
-        )
-    except Exception as e:
-        print("getToken http requests failed: {0}".format(e))
-        return False
-    json_text = json.loads(result.text)
-    if result.status_code == 200 and json_text["msgCode"] == 200:
-        token = json_text["data"]["certification"]["token"]
-        return token
-    elif result.status_code == 200 and json_text["msgCode"] == 406:
-        print(
-            "Get token failed, http code: % s, % s"
-            % (str(json_text["msgCode"]), json_text["message"])
-        )
-        exit(1)
-    else:
-        print(
-            "Get token failed, http code: % s, % s"
-            % (str(result.status_code), result.text)
-        )
-        exit(1)
-
-
-def host_access_management(host_ip, template_ids, cmdb_id="", cluster_id=3, target_id=200):
-    """主机接入管理：获取 instanceId → 关联资源 → 绑定模板 → 保存"""
-    token = getToken()
-    headers = {
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-        "snc-token": token,
-    }
-
-    # 1. 查询主机 instanceId
-    result = requests.post(
-        url=domain + "/snc-platform-mapping/joinInfo/resourceInstance/list",
-        json={
-            "params": {
-                "condition": {
-                    "resourceId": 24,
-                    "resourceCode": "host",
-                    "resourceName": "主机",
-                    "parentCode": "logical_host",
-                    "instanceName": host_ip,
-                },
-                "pagination": {"pagenum": 1, "pagesize": 50},
-            }
-        },
-        headers=headers, verify=False,
-    )
-    instance_id = result.json()["data"]["records"][0]["instanceId"]
-    print(">>> 主机接入 instanceId: {}".format(instance_id))
-
-    # 2. 关联资源
-    requests.post(
-        url=domain + "/snc-ng-server/resource/join",
-        json={"params": {"ids": [instance_id]}},
-        headers=headers, verify=False,
-    )
-    print(">>> 关联资源完成")
-
-    # 3. 绑定监控模板
-    if template_ids:
-        requests.post(
-            url=domain + "/snc-platform-mapping/monitor/template/hostRelTemplateBatch",
-            json={"params": [{"cmdbId": cmdb_id, "templateIds": template_ids}]},
-            headers=headers, verify=False,
-        )
-        print(">>> 绑定模板完成: {}".format(template_ids))
-
-    # 4. 保存接入配置
-    requests.post(
-        url=domain + "/snc-ng-server/resource/saveOrUpdateJoin",
-        json={
-            "params": [{
-                "clusterId": cluster_id,
-                "instanceId": instance_id,
-                "instanceName": host_ip,
-                "joinMode": 3,
-                "targetId": target_id,
-            }]
-        },
-        headers=headers, verify=False,
-    )
-    print(">>> 主机接入保存完成")
-
-
 def main():
     """入口：获取本机IP → 查询CMDB获取机房/数据中心 → 选择对应Proxy → 安装Agent"""
 
@@ -646,27 +546,17 @@ def main():
         print(">>> CMDB未查到主机信息，默认使用代理: {}".format(proxy_url))
 
     # ========== 安装 Agent ==========
-    install_ok = False
-    template_ids = []
     if sys.platform.startswith("win"):
         print(">>> 检测到 Windows 系统，开始安装 Agent...")
-        install_ok = windows_agent_install(proxy_url, domain, install_path, overwrite_installation)
-        template_ids = [178]  # Windows 模板
+        windows_agent_install(proxy_url, domain, install_path, overwrite_installation)
     elif sys.platform.startswith("linux"):
         print(">>> 检测到 Linux 系统，开始安装 Agent...")
         if agent_user and not check_and_create_user(agent_user):
             print(">>> 用户检查失败，安装终止")
             return
-        install_ok = linux_agent_install(proxy_url, domain, agent_user, install_path, overwrite_installation)
-        template_ids = [210]  # Linux 模板
+        linux_agent_install(proxy_url, domain, agent_user, install_path, overwrite_installation)
     else:
         print(">>> 不支持的系统类型: {}，跳过 Agent 安装".format(sys.platform))
-
-    # ========== 关联监控模板 ==========
-    if install_ok and host_cmdbId:
-        host_access_management(agent_host, template_ids, cmdb_id=host_cmdbId)
-    elif not install_ok:
-        print(">>> Agent 安装失败，跳过模板关联")
 
 
 if __name__ == '__main__':
