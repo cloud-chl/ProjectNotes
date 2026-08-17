@@ -12,7 +12,8 @@ import requests
 import subprocess
 
 # ========== 配置区 ==========
-accessKey = "UMS_ACCESS_KEY"  # 接口凭证
+# accessKey = "UMS_ACCESS_KEY"  # 接口凭证
+accessKey = "3550c2efecfc45fca81b76115f620f7f"  # 接口凭证
 proxy_url_gd = "http://10.129.134.27:10031"      # 观达机房代理
 proxy_url_sx = "http://10.129.134.32:10031"      # 沙溪机房代理
 domain = "https://ums-test.gf.com.cn"             # 域名
@@ -375,6 +376,7 @@ def get_host_cmdbid(domain, access_token, host_ip):
     )
     if result and result.get("data"):
         return result["data"][0]["cmdbId"]
+    print(result)
     return None
 
 
@@ -521,9 +523,10 @@ def main():
 
     # ========== 参数区 ==========
     # 由 CD 平台注入: EASYOPS_LOCAL_IP (本机IP), inputUser (执行用户), overwrite_install (覆盖安装)
-    agent_host = EASYOPS_LOCAL_IP
-    agent_user = inputUser
-    overwrite_installation = str(overwrite_install).lower() in ("true", "1")
+    agent_host = "10.129.134.28"
+    #agent_host = EASYOPS_LOCAL_IP
+    #agent_user = inputUser
+    #overwrite_installation = str(overwrite_install).lower() in ("true", "1")
 
     # 安装路径: Linux /opt/gf-ums, Windows C:\gf-ums
     if sys.platform.startswith("win"):
@@ -546,17 +549,17 @@ def main():
         print(">>> CMDB未查到主机信息，默认使用代理: {}".format(proxy_url))
 
     # ========== 安装 Agent ==========
-    if sys.platform.startswith("win"):
-        print(">>> 检测到 Windows 系统，开始安装 Agent...")
-        windows_agent_install(proxy_url, domain, install_path, overwrite_installation)
-    elif sys.platform.startswith("linux"):
-        print(">>> 检测到 Linux 系统，开始安装 Agent...")
-        if agent_user and not check_and_create_user(agent_user):
-            print(">>> 用户检查失败，安装终止")
-            return
-        linux_agent_install(proxy_url, domain, agent_user, install_path, overwrite_installation)
-    else:
-        print(">>> 不支持的系统类型: {}，跳过 Agent 安装".format(sys.platform))
+    # if sys.platform.startswith("win"):
+    #     print(">>> 检测到 Windows 系统，开始安装 Agent...")
+    #     windows_agent_install(proxy_url, domain, install_path, overwrite_installation)
+    # elif sys.platform.startswith("linux"):
+    #     print(">>> 检测到 Linux 系统，开始安装 Agent...")
+    #     if agent_user and not check_and_create_user(agent_user):
+    #         print(">>> 用户检查失败，安装终止")
+    #         return
+    #     linux_agent_install(proxy_url, domain, agent_user, install_path, overwrite_installation)
+    # else:
+    #     print(">>> 不支持的系统类型: {}，跳过 Agent 安装".format(sys.platform))
 
 
 if __name__ == '__main__':

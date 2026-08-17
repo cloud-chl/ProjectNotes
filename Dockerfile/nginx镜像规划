@@ -1,0 +1,1080 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: nginx
+  namespace: ums
+  selfLink: /apis/apps/v1/namespaces/ums/deployments/nginx
+  uid: 10905ace-e03c-4a53-bd4c-66f71669c682
+  resourceVersion: '2014560807'
+  generation: 139
+  creationTimestamp: '2026-03-16T10:29:59Z'
+  labels:
+    app: nginx
+    app.kubernetes.io/managed-by: Helm
+    release: nginx
+    version: v1
+  annotations:
+    asm.huaweicloud.com/post: '{}'
+    deployment.kubernetes.io/revision: '123'
+    meta.helm.sh/release-name: nginx
+    meta.helm.sh/release-namespace: ums
+    policies.kyverno.io/last-applied-patches: >
+      modify-all-deployment-spec.modify-all-deployment-spec.kyverno.io: replaced
+      /spec/revisionHistoryLimit
+  managedFields:
+    - manager: cam-apiserver
+      operation: Update
+      apiVersion: apps/v1
+      time: '2026-07-31T06:19:12Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:annotations:
+            .: {}
+            f:asm.huaweicloud.com/post: {}
+            f:meta.helm.sh/release-name: {}
+            f:meta.helm.sh/release-namespace: {}
+          f:labels:
+            .: {}
+            f:app: {}
+            f:app.kubernetes.io/managed-by: {}
+            f:release: {}
+            f:version: {}
+        f:spec:
+          f:progressDeadlineSeconds: {}
+          f:revisionHistoryLimit: {}
+          f:selector: {}
+          f:strategy:
+            f:rollingUpdate:
+              .: {}
+              f:maxSurge: {}
+              f:maxUnavailable: {}
+            f:type: {}
+          f:template:
+            f:metadata:
+              f:annotations:
+                .: {}
+                f:sidecar.istio.io/inject: {}
+              f:labels:
+                .: {}
+                f:app: {}
+                f:release: {}
+                f:sidecar.istio.io/inject: {}
+                f:version: {}
+            f:spec:
+              f:affinity:
+                .: {}
+                f:podAntiAffinity:
+                  .: {}
+                  f:preferredDuringSchedulingIgnoredDuringExecution: {}
+              f:containers:
+                k:{"name":"a-nginx"}:
+                  .: {}
+                  f:args: {}
+                  f:imagePullPolicy: {}
+                  f:livenessProbe:
+                    .: {}
+                    f:failureThreshold: {}
+                    f:initialDelaySeconds: {}
+                    f:successThreshold: {}
+                    f:tcpSocket:
+                      .: {}
+                      f:port: {}
+                    f:timeoutSeconds: {}
+                  f:name: {}
+                  f:ports:
+                    .: {}
+                    k:{"containerPort":8080,"protocol":"TCP"}:
+                      .: {}
+                      f:containerPort: {}
+                      f:name: {}
+                      f:protocol: {}
+                  f:readinessProbe:
+                    .: {}
+                    f:failureThreshold: {}
+                    f:initialDelaySeconds: {}
+                    f:successThreshold: {}
+                    f:tcpSocket:
+                      .: {}
+                      f:port: {}
+                    f:timeoutSeconds: {}
+                  f:resources:
+                    .: {}
+                    f:limits:
+                      .: {}
+                      f:cpu: {}
+                      f:memory: {}
+                    f:requests:
+                      .: {}
+                      f:cpu: {}
+                      f:memory: {}
+                  f:terminationMessagePath: {}
+                  f:terminationMessagePolicy: {}
+                  f:volumeMounts:
+                    .: {}
+                    k:{"mountPath":"/tmp/shsnc.conf"}:
+                      .: {}
+                      f:mountPath: {}
+                      f:name: {}
+                      f:subPath: {}
+              f:dnsPolicy: {}
+              f:restartPolicy: {}
+              f:schedulerName: {}
+              f:securityContext: {}
+              f:terminationGracePeriodSeconds: {}
+              f:volumes:
+                .: {}
+                k:{"name":"shsnc-conf"}:
+                  .: {}
+                  f:configMap:
+                    .: {}
+                    f:defaultMode: {}
+                    f:items: {}
+                    f:name: {}
+                  f:name: {}
+    - manager: Mozilla
+      operation: Update
+      apiVersion: apps/v1
+      time: '2026-07-31T06:51:25Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:spec:
+          f:replicas: {}
+          f:template:
+            f:spec:
+              f:containers:
+                k:{"name":"a-nginx"}:
+                  f:command: {}
+                  f:image: {}
+                  f:livenessProbe:
+                    f:periodSeconds: {}
+                  f:readinessProbe:
+                    f:periodSeconds: {}
+                  f:volumeMounts:
+                    k:{"mountPath":"/tmp/dumps"}:
+                      .: {}
+                      f:mountPath: {}
+                      f:name: {}
+              f:volumes:
+                k:{"name":"java-dump"}:
+                  .: {}
+                  f:name: {}
+                  f:persistentVolumeClaim:
+                    .: {}
+                    f:claimName: {}
+    - manager: kube-controller-manager
+      operation: Update
+      apiVersion: apps/v1
+      time: '2026-08-03T06:42:52Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:annotations:
+            f:deployment.kubernetes.io/revision: {}
+        f:status:
+          f:availableReplicas: {}
+          f:conditions:
+            .: {}
+            k:{"type":"Available"}:
+              .: {}
+              f:lastTransitionTime: {}
+              f:lastUpdateTime: {}
+              f:message: {}
+              f:reason: {}
+              f:status: {}
+              f:type: {}
+            k:{"type":"Progressing"}:
+              .: {}
+              f:lastTransitionTime: {}
+              f:lastUpdateTime: {}
+              f:message: {}
+              f:reason: {}
+              f:status: {}
+              f:type: {}
+          f:observedGeneration: {}
+          f:readyReplicas: {}
+          f:replicas: {}
+          f:updatedReplicas: {}
+      subresource: status
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+      version: v1
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx
+        release: nginx
+        sidecar.istio.io/inject: 'true'
+        version: v1
+      annotations:
+        sidecar.istio.io/inject: 'true'
+    spec:
+      volumes:
+        - name: shsnc-conf
+          configMap:
+            name: ums-nginx-config
+            items:
+              - key: shsnc.conf
+                path: shsnc.conf
+            defaultMode: 420
+        - name: java-dump
+          persistentVolumeClaim:
+            claimName: snc-java-temp
+      containers:
+        - name: a-nginx
+          image: dockertest.gf.com.cn/ums/nginx:v1-20260803-test
+          command:
+            - /bin/sh
+            - '-c'
+          args:
+            - >
+              RESOLVER_IP=$(grep -E '^nameserver' /etc/resolv.conf | awk
+              '{print$2}' | head -n 1);   cat /tmp/shsnc.conf >
+              /opt/nginx/conf/conf.d/shsnc.conf;  sed -i "/^resolver /c resolver
+              $RESOLVER_IP valid=10s;" /opt/nginx/conf/conf.d/shsnc.conf;
+              /opt/nginx/sbin/nginx -t;  exec /opt/nginx/sbin/nginx -g "daemon
+              off;"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 200m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 300Mi
+          volumeMounts:
+            - name: shsnc-conf
+              mountPath: /tmp/shsnc.conf
+              subPath: shsnc.conf
+            - name: java-dump
+              mountPath: /tmp/dumps
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - nginx
+                topologyKey: kubernetes.io/hostname
+      schedulerName: default-scheduler
+      enableServiceLinks: false
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 1
+  progressDeadlineSeconds: 600
+status:
+  observedGeneration: 139
+  replicas: 1
+  updatedReplicas: 1
+  readyReplicas: 1
+  availableReplicas: 1
+  conditions:
+    - type: Available
+      status: 'True'
+      lastUpdateTime: '2026-07-31T08:11:34Z'
+      lastTransitionTime: '2026-07-31T08:11:34Z'
+      reason: MinimumReplicasAvailable
+      message: Deployment has minimum availability.
+    - type: Progressing
+      status: 'True'
+      lastUpdateTime: '2026-08-03T06:42:52Z'
+      lastTransitionTime: '2026-07-22T05:00:45Z'
+      reason: NewReplicaSetAvailable
+      message: ReplicaSet "nginx-789db7f4d6" has successfully progressed.
+
+---
+I have no name! [ /opt/bitnami/nginx ]$ pwd
+/opt/bitnami/nginx
+I have no name! [ /opt/bitnami/nginx ]$ ls -l *
+lrwxrwxrwx 1 root root    4 Jul  6 21:31 html -> /app
+
+conf:
+total 68
+drwxrwxr-x 1 root root   24 Jul 30 03:46 bitnami
+drwxrwxr-x 5 root root   44 Jul  6 21:31 context.d
+-rw-rw-r-- 1 root root 1077 Jun 23 09:31 fastcgi.conf
+-rw-rw-r-- 1 root root 1077 Jun 23 09:31 fastcgi.conf.default
+-rw-rw-r-- 1 root root 1075 Jul  6 21:31 fastcgi_params
+-rw-rw-r-- 1 root root 1007 Jun 23 09:31 fastcgi_params.default
+-rw-rw-r-- 1 root root 2837 Jun 23 09:31 koi-utf
+-rw-rw-r-- 1 root root 2223 Jun 23 09:31 koi-win
+-rw-rw-r-- 1 root root 5349 Jun 23 09:31 mime.types
+-rw-rw-r-- 1 root root 5349 Jun 23 09:31 mime.types.default
+-rw-rw-r-- 1 root root 2350 Jul  6 21:31 nginx.conf
+-rw-rw-r-- 1 root root 2630 Jun 23 09:31 nginx.conf.default
+-rw-rw-r-- 1 root root  636 Jun 23 09:31 scgi_params
+-rw-rw-r-- 1 root root  636 Jun 23 09:31 scgi_params.default
+drwxrwxr-x 2 root root    6 Jul  6 21:31 server_blocks
+drwxrwxr-x 2 root root    6 Jul  6 21:31 stream_server_blocks
+-rw-rw-r-- 1 root root  664 Jun 23 09:31 uwsgi_params
+-rw-rw-r-- 1 root root  664 Jun 23 09:31 uwsgi_params.default
+-rw-rw-r-- 1 root root 3611 Jun 23 09:31 win-utf
+
+conf.default:
+total 68
+drwxr-xr-x 2 root root   91 Jul  6 21:31 bitnami
+drwxr-xr-x 5 root root   44 Jul  6 21:31 context.d
+-rw-r--r-- 1 root root 1077 Jul  6 21:31 fastcgi.conf
+-rw-r--r-- 1 root root 1077 Jul  6 21:31 fastcgi.conf.default
+-rw-r--r-- 1 root root 1075 Jul  6 21:31 fastcgi_params
+-rw-r--r-- 1 root root 1007 Jul  6 21:31 fastcgi_params.default
+-rw-r--r-- 1 root root 2837 Jul  6 21:31 koi-utf
+-rw-r--r-- 1 root root 2223 Jul  6 21:31 koi-win
+-rw-r--r-- 1 root root 5349 Jul  6 21:31 mime.types
+-rw-r--r-- 1 root root 5349 Jul  6 21:31 mime.types.default
+-rw-r--r-- 1 root root 2350 Jul  6 21:31 nginx.conf
+-rw-r--r-- 1 root root 2630 Jul  6 21:31 nginx.conf.default
+-rw-r--r-- 1 root root  636 Jul  6 21:31 scgi_params
+-rw-r--r-- 1 root root  636 Jul  6 21:31 scgi_params.default
+drwxr-xr-x 2 root root    6 Jul  6 21:31 server_blocks
+drwxr-xr-x 2 root root    6 Jul  6 21:31 stream_server_blocks
+-rw-r--r-- 1 root root  664 Jul  6 21:31 uwsgi_params
+-rw-r--r-- 1 root root  664 Jul  6 21:31 uwsgi_params.default
+-rw-r--r-- 1 root root 3611 Jul  6 21:31 win-utf
+
+licenses:
+total 28
+-rw-r--r-- 1 root root 1319 Jun 23 09:31 nginx-1.31.2.txt
+-rw-r--r-- 1 root root 1435 Jun 23 09:31 nginx-module-brotli-0.20231009.0.txt
+-rw-r--r-- 1 root root 1311 Jun 23 09:31 nginx-module-geoip2-3.4.0.txt
+-rw-r--r-- 1 root root 1564 Jun 23 09:31 nginx-module-njs-0.9.9.txt
+-rw-r--r-- 1 root root 5901 Jun 23 09:31 nginx-module-substitutions-filter-0.20220124.0.txt
+-rw-r--r-- 1 root root 1312 Jun 23 09:31 nginx-module-vts-0.2.5.txt
+
+logs:
+total 0
+lrwxrwxrwx 1 root root 11 Jul  6 21:31 access.log -> /dev/stdout
+lrwxrwxrwx 1 root root 11 Jul  6 21:31 error.log -> /dev/stderr
+
+modules:
+total 4312
+-rwxr-xr-x 1 root root  851800 Jun 23 09:31 ngx_http_brotli_filter_module.so
+-rwxr-xr-x 1 root root   15064 Jun 23 09:31 ngx_http_brotli_static_module.so
+-rwxr-xr-x 1 root root   27720 Jun 23 09:31 ngx_http_dav_module.so
+-rwxr-xr-x 1 root root   27448 Jun 23 09:31 ngx_http_geoip2_module.so
+-rwxr-xr-x 1 root root 1745920 Jun 23 09:31 ngx_http_js_module.so
+-rwxr-xr-x 1 root root   27352 Jun 23 09:31 ngx_stream_geoip2_module.so
+-rwxr-xr-x 1 root root 1710040 Jun 23 09:31 ngx_stream_js_module.so
+
+sbin:
+total 2204
+-rwxr-xr-x 1 root root 2254408 Jun 23 09:31 nginx
+
+tmp:
+total 4
+drwx------ 5 1001 root 33 Jul 31 01:02 client_body
+drwx------ 2 1001 root  6 Jul 30 03:46 fastcgi
+-rw-r--r-- 1 1001 root  2 Jul 30 03:46 nginx.pid
+drwx------ 2 1001 root  6 Jul 30 03:46 proxy
+drwx------ 2 1001 root  6 Jul 30 03:46 scgi
+drwx------ 2 1001 root  6 Jul 30 03:46 uwsgi
+I have no name! [ /opt/bitnami/nginx ]$
+---
+FROM dockertest.gf.com.cn/ums/nginx:v20260710
+
+ADD --chown=1001:1001 @project/ /opt/bitnami/nginx/html/@project
+ADD --chown=1001:1001 web_root/ /opt/bitnami/nginx/html/web_root
+---
+nginx.conf -|
+I have no name! [ /opt/bitnami/nginx/conf ]$ cat nginx.conf
+# Based on https://www.nginx.com/resources/wiki/start/topics/examples/full/#nginx-conf
+user              www www;  ## Default: nobody
+
+worker_processes  auto;
+error_log         "/opt/bitnami/nginx/logs/error.log";
+pid               "/opt/bitnami/nginx/tmp/nginx.pid";
+
+include  "/opt/bitnami/nginx/conf/context.d/main/*.conf";
+
+events {
+    worker_connections  1024;
+    include  "/opt/bitnami/nginx/conf/context.d/events/*.conf";
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    log_format    main '$remote_addr - $remote_user [$time_local] '
+                       '"$request" $status $body_bytes_sent "$http_referer" '
+                       '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log    "/opt/bitnami/nginx/logs/access.log" main;
+    add_header    X-Frame-Options SAMEORIGIN;
+
+    client_body_temp_path  "/opt/bitnami/nginx/tmp/client_body" 1 2;
+    proxy_temp_path        "/opt/bitnami/nginx/tmp/proxy" 1 2;
+    fastcgi_temp_path      "/opt/bitnami/nginx/tmp/fastcgi" 1 2;
+    scgi_temp_path         "/opt/bitnami/nginx/tmp/scgi" 1 2;
+    uwsgi_temp_path        "/opt/bitnami/nginx/tmp/uwsgi" 1 2;
+
+    sendfile           on;
+    tcp_nopush         on;
+    tcp_nodelay        off;
+    gzip               on;
+    gzip_http_version  1.0;
+    gzip_comp_level    2;
+    gzip_proxied       any;
+    gzip_types         text/plain text/css application/javascript text/xml application/xml+rss;
+    keepalive_timeout  65;
+    ssl_protocols      TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305;
+    client_max_body_size 80M;
+    server_tokens off;
+
+    absolute_redirect  off;
+    port_in_redirect   off;
+
+    include  "/opt/bitnami/nginx/conf/context.d/http/*.conf";
+    include  "/opt/bitnami/nginx/conf/server_blocks/*.conf";
+
+    # HTTP Server
+    server {
+        # Port to listen on, can also be set in IP:PORT format
+        listen  8080;
+
+        include  "/opt/bitnami/nginx/conf/bitnami/*.conf";
+
+        location /status {
+            stub_status on;
+            access_log   off;
+            allow 127.0.0.1;
+            deny all;
+        }
+    }
+}
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ums-nginx-config
+  namespace: ums
+  selfLink: /api/v1/namespaces/ums/configmaps/ums-nginx-config
+  uid: 261dde9d-e491-4193-9b1b-818de29edba7
+  resourceVersion: '2009528489'
+  creationTimestamp: '2026-06-09T02:13:36Z'
+  labels:
+    originName: ums-nginx-config
+  annotations:
+    description: '--'
+  managedFields:
+    - manager: Mozilla
+      operation: Update
+      apiVersion: v1
+      time: '2026-06-17T10:42:04Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:data:
+          .: {}
+          f:shsnc.conf: {}
+        f:metadata:
+          f:annotations:
+            .: {}
+            f:backupMaxVersion: {}
+            f:currentVersion: {}
+            f:description: {}
+          f:labels:
+            .: {}
+            f:originName: {}
+data:
+  shsnc.conf: |-
+    resolver {{RESOLVER_IP}} valid=10s;
+
+    # base.location
+    set $snc_base_keymgr "snc-base-keymgr.ums.svc.cluster.local:8080";
+    set $snc_base_gateway "snc-base-gateway.ums.svc.cluster.local:8080";
+    set $snc_base_service "snc-base-service.ums.svc.cluster.local:8080";
+    set $snc_base_user "snc-base-user.ums.svc.cluster.local:8080";
+    set $snc_sso_oauth2 "snc-sso-oauth2.ums.svc.cluster.local:8080";
+    set $snc_manager_center "snc-manager-center.ums.svc.cluster.local:8080";
+    set $snc_telemetry_bpc "snc-telemetry-bpc.ums.svc.cluster.local:8080";
+    set $snc_telemetry_apm "snc-telemetry-apm.ums.svc.cluster.local:8080";
+    set $snc_telemetry_aimcp "snc-telemetry-aimcp.ums.svc.cluster.local:8080";
+
+    # cmdb.location
+    set $snc_cmdb_discovery "snc-cmdb-discovery.ums.svc.cluster.local:8080";
+    set $snc_cmdb_job "snc-cmdb-job.ums.svc.cluster.local:8080";
+    set $snc_cmdb_server "snc-cmdb-server.ums.svc.cluster.local:8080";
+
+    # platform.location
+    set $snc_platform_manager "snc-platform-manager.ums.svc.cluster.local:8080";
+    set $snc_platform_mapping "snc-platform-mapping.ums.svc.cluster.local:8080";
+    set $snc_platform_ml "snc-platform-ml.ums.svc.cluster.local:8080";
+    set $snc_platform_node "snc-platform-node.ums.svc.cluster.local:18080";
+    #set $snc_platform_node "10.129.67.34:18080";
+    set $snc_datacenter "snc-datacenter.ums.svc.cluster.local:8080";
+    set $snc_ng_server "snc-ng-server.ums.svc.cluster.local:8080";
+    set $snc_data_integration "snc-data-integration.ums.svc.cluster.local:8080";
+    set $snc_fault_analysis "snc-fault-analysis.ums.svc.cluster.local:8080";
+
+    # dev-center.locattion
+    set $snc_dev_center "snc-dev-center.ums.svc.cluster.local:8080";
+    set $snc_dev_center_data "snc-dev-center-data.ums.svc.cluster.local:8080";
+
+    # other
+    set $snc_trade_log "snc-trade-log.ums.svc.cluster.local:8080";
+
+    error_page 500 502 503 504 /50x.html;
+
+    location = /50x.html {
+        root /opt/nginx/html;
+        internal;
+    }
+
+    client_header_buffer_size 4k;
+    client_max_body_size 1024M;
+    proxy_buffers 16 10240k;
+    proxy_buffer_size 10240k;
+    large_client_header_buffers 8 16k;
+
+    location = / {
+        return 302 /front/authLogin;
+        #root /opt/nginx/html/web_root/;
+        #index index.html;
+        #sub_filter '<head>' '<head>  <link href="/web_root/js/chunk-vendors.fuck.js" rel="preload" as="script"> ';
+        #sub_filter_types *;
+        #sub_filter_once on;
+        #index index.html;
+    }
+    location = /front/login {
+        rewrite ^ /front/login?sncToken=xxx break;
+    }
+    location /nginx_status {
+        stub_status on;
+        access_log off;
+    }
+
+    location /login/callback {
+        rewrite ^ /front/login/callback permanent;
+    }
+
+    location ^~ /web_root/ {
+        root /opt/nginx/html/;
+        index web_root/index.html;
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
+        if ($request_method = 'OPTIONS') {
+                return 204;
+        }
+    }
+
+    location ^~ /libs/ {
+        root /opt/nginx/html/web_root;
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
+        if ($request_method = 'OPTIONS') {
+                return 204;
+        }
+    }
+
+    location ^~ /@project/ {
+        root /opt/nginx/html/;
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
+        if ($request_method = 'OPTIONS') {
+                return 204;
+        }
+    }
+
+    location ^~ /front/ {
+        try_files '' /web_root/index.html;
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
+        if ($request_method = 'OPTIONS') {
+                return 204;
+        }
+    }
+
+    location ~ .*stats\.json$ {
+        root /opt/nginx/html/;
+        add_header Cache-Control no-cache;
+        add_header Pragma no-cache;
+        add_header Expires 0;
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
+        if ($request_method = 'OPTIONS') {
+                return 204;
+        }
+    }
+
+    location /user_image/ {
+        alias /tmp/user_image/;
+        autoindex on;
+    }
+
+    location ~ .*/.(jpg|jpeg|png|bmp)$ {
+        expires 24h;
+        root /tmp/user_image/;
+        proxy_store on;
+        proxy_store_access user:rw group:rw all:rw;
+        proxy_temp_path /tmp/user_image/;
+        proxy_redirect off;
+        client_max_body_size 10m;
+        client_body_buffer_size 1280k;
+        proxy_connect_timeout 900;
+        proxy_send_timeout 900;
+        proxy_read_timeout 900;
+        proxy_buffer_size 40k;
+        proxy_buffers 40 320k;
+        proxy_busy_buffers_size 640k;
+        proxy_temp_file_write_size 640k;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+    }
+
+    location /workflow-pmd {
+        alias /opt/nginx/html/@project/web_workflow_pmd;
+        index index.html;
+    }
+
+
+    ##### oauth.location ###
+    location /snc-sso-oauth2/ {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_set_header X-Accel-Buffering no;
+        proxy_connect_timeout 4s;
+        proxy_read_timeout 7200s;
+        proxy_send_timeout 12s;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_pass http://snc-sso-oauth2.ums.svc.cluster.local:8080/;
+        proxy_buffering off;
+        proxy_http_version 1.1;
+    }
+
+    ##### cmdb_sync.locatoin ###
+    location /snc-third-cmdb {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_set_header X-Accel-Buffering no;
+        proxy_connect_timeout 4s;
+        proxy_read_timeout 7200s;
+        proxy_send_timeout 12s;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_pass http://snc-third-cmdb.ums.svc.cluster.local:8080;
+        proxy_buffering off;
+        proxy_http_version 1.1;
+    }
+    location  /snc-base-gateway {
+        rewrite ^/snc-base-gateway/(.*)$ /$1 break;
+        #proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_base_gateway;
+    }
+    ##### base.location ###
+    location  /user {
+        #proxy_set_header Host $proxy_host;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_base_user;
+    }
+
+    location  /authorization {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_base_user;
+    }
+
+    location  /base-service {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_base_service;
+    }
+
+    location /message {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_base_service;
+    }
+
+    location /log {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_base_service;
+    }
+
+    location /license-center {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_base_service;
+    }
+
+    location ^~ /license {
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        client_max_body_size 1G;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_base_service;
+    }
+
+    location /managerCenter {
+        proxy_connect_timeout 1800s;
+        proxy_read_timeout 1800s;
+        proxy_send_timeout 1800s;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_manager_center;
+    }
+
+    location /dudit {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_base_service;
+    }
+
+    location /keymgr {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        client_max_body_size 300M;
+        proxy_http_version 1.1;
+        proxy_pass http://$snc_base_keymgr;
+    }
+
+    location /snc-dev-center/minio/ {
+        default_type application/json;
+        proxy_hide_header  Content-Type;
+        if ($request_filename ~* \.css$) {
+           add_header Content-Type text/css;
+        }
+        if ($request_filename ~* \.svg$) {
+           add_header Content-Type image/svg+xml;
+        }
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_pass http://10.129.137.31:8080/;
+    }
+
+    location /snc-dev-center {
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_pass http://$snc_dev_center;
+    }
+
+    location /snc-dev-center-data {
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_pass http://$snc_dev_center_data;
+    }
+
+    location  /snc-telemetry-apm {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_telemetry_apm;
+    }
+
+    location  /snc-telemetry-bpc {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_telemetry_bpc;
+    }
+
+    ##### cmdb.location ###
+    location /snc-cmdb-server {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_cmdb_server;
+    }
+
+    location /snc-cmdb-job {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_cmdb_job;
+    }
+
+    location /snc-cmdb-discovery {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_cmdb_discovery;
+    }
+
+    ##### platform.location ###
+    location /snc-platform-manager {
+        proxy_connect_timeout 7200s;
+        proxy_read_timeout 7200s;
+        proxy_send_timeout 7200s;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        client_max_body_size 1G;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_platform_manager;
+    }
+
+    location /snc-platform-mapping {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_platform_mapping;
+    }
+
+    location /snc-platform-ml {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_connect_timeout 4s;
+        proxy_read_timeout 7200s;
+        proxy_send_timeout 12s;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_http_version 1.1;
+        proxy_pass http://$snc_platform_ml;
+    }
+
+    location /snc-platform-node {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_connect_timeout 4s;
+        proxy_read_timeout 7200s;
+        proxy_send_timeout 12s;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_http_version 1.1;
+        proxy_pass http://$snc_platform_node;
+    }
+
+    location /snc-ng-server {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_ng_server;
+    }
+
+    location /metastore{
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_datacenter;
+    }
+
+    location /datacenter{
+        proxy_http_version 1.1;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_set_header Connection "";
+        proxy_pass http://$snc_datacenter;
+    }
+
+    location /snc-data-integration {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_connect_timeout 4s;
+        proxy_read_timeout 7200s;
+        proxy_send_timeout 12s;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_http_version 1.1;
+        proxy_pass http://$snc_data_integration;
+    }
+
+    location /snc-fault-analysis {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_connect_timeout 4s;
+        proxy_read_timeout 7200s;
+        proxy_send_timeout 12s;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_http_version 1.1;
+        proxy_pass http://$snc_fault_analysis;
+    }
+    location /snc-trade-log {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_connect_timeout 4s;
+        proxy_read_timeout 7200s;
+        proxy_send_timeout 12s;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_http_version 1.1;
+        proxy_pass http://$snc_trade_log;
+    }
+    location /snc-platform-ml/ai/diagnosis/stream/ {
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_set_header X-Accel-Buffering no;
+        proxy_connect_timeout 4s;
+        proxy_read_timeout 7200s;
+        proxy_send_timeout 12s;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_buffering off;
+        proxy_http_version 1.1;
+        proxy_pass http://$snc_platform_ml;
+    }
+    location /snc-telemetry-aimcp/ {
+        limit_except GET POST OPTIONS HEAD {
+            deny all;
+        }
+        access_log off;
+        error_log /dev/null;
+        proxy_pass http://$snc_telemetry_aimcp;
+        header_filter_by_lua_file /opt/nginx/lua/status_200.lua;
+        proxy_http_version 1.1;
+        # SSE 必备
+        proxy_buffering off;
+        gzip off;
+        proxy_cache off;
+        proxy_set_header Connection "";
+        proxy_set_header X-Accel-Buffering no;
+        # 防止 Dify / inspector 长连接断开
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        # 基础透传
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    location /dumps/ {
+        alias /tmp/;
+        autoindex on;
+        autoindex_exact_size off;
+        autoindex_localtime on;
+    }

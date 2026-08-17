@@ -73,3 +73,13 @@ settings.ini
 *.tar.gz
 *.rar
 *.7z 
+
+# 本地临时/工具产物（不提交）
+.claude/
+temp/
+Python/temp/
+dsh-dshmarket-backup-*.json
+预处理脚本/temp.json
+预处理脚本/temp2.json
+Python/pyscript_secrets*.json
+

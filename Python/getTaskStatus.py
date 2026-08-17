@@ -18,6 +18,83 @@ WEBHOOK = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=2702dee9-a257-47
 # 任务状态映射（采集任务: 1.py/3, 流批任务: 0/1.py/2）
 STATUS_LABEL = {1: "停止", 2: "异常", 3: "运行中", 6: "禁用"}
 STREAM_STATUS_LABEL = {0: "停止", 1: "运行中", 2: "异常"}
+BASELINE_STATUS_LABEL = {1: "正常", 2: "异常"}
+
+# 仅此采集任务跟随 A股交易时段休市（需与平台任务名完全一致）
+COUNTER_TASK_NAME = "柜台功能号指标监控采集"
+
+# 免告警任务黑名单（需与平台任务名完全一致）：
+# 列表中的任务异常时不发送企业微信告警，对采集任务、流批任务、基线任务均生效，
+# 控制台汇总照常展示。有不需要告警的任务时在此追加名称即可。
+NO_ALERT_TASKS = [
+    "主机P95指标采集",
+]
+
+# A股交易时段：上午 09:30 开盘，下午 15:00 收盘
+MARKET_OPEN = datetime.time(9, 30)
+MARKET_CLOSE = datetime.time(15, 0)
+
+# 2026 年 A股休市日（法定节假日，不含周末；周末已由 weekday 判断排除）。
+# 优先使用 chinese_calendar 库自动判断，未安装时回退到此列表。
+# 每年年底需按国务院节假日通知更新次年日期。
+A_SHARE_HOLIDAYS_2026 = {
+    "2026-01-01", "2026-01-02",                                      # 元旦
+    "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19",          # 春节
+    "2026-02-20", "2026-02-23",
+    "2026-04-06",                                                    # 清明
+    "2026-05-01", "2026-05-04", "2026-05-05",                        # 劳动节
+    "2026-06-19",                                                    # 端午
+    "2026-09-25",                                                    # 中秋
+    "2026-10-01", "2026-10-02", "2026-10-05", "2026-10-06",          # 国庆
+    "2026-10-07",
+}
+
+try:
+    import chinese_calendar as _cn_cal
+    _HAS_CN_CAL = True
+except ImportError:
+    _HAS_CN_CAL = False
+
+
+def is_trading_day(d):
+    """判断日期 d(datetime.date)是否为 A股交易日：周一到五且非法定节假日。"""
+    if d.weekday() >= 5:  # 周六、周日
+        return False
+    if _HAS_CN_CAL:
+        # is_workday 对调休补班的周六返回 True，但已被上面的 weekday 判断排除；
+        # 法定节假日(周一到五)会返回 False，正好排除。
+        try:
+            return _cn_cal.is_workday(d)
+        except NotImplementedError:
+            # 库未覆盖该年份，回退到硬编码列表
+            pass
+    return d.strftime("%Y-%m-%d") not in A_SHARE_HOLIDAYS_2026
+
+
+def is_ashare_monitor_period(now=None):
+    """判断当前是否处于采集任务需要监控的时段。
+
+    休市期间(周末、法定节假日)不监控；交易日内正常监控。
+    收盘后若次日不开盘(如周五、节前最后一个交易日)则不监控，
+    直到下一个交易日 09:30 开盘再恢复。
+    """
+    if now is None:
+        now = datetime.datetime.now()
+    today = now.date()
+    t = now.time()
+    one_day = datetime.timedelta(days=1)
+
+    # 今天不是交易日，直接不监控
+    if not is_trading_day(today):
+        return False
+    # 开盘前：仅当昨天也是交易日才监控(周一/节后首日开盘前不监控)
+    if t < MARKET_OPEN:
+        return is_trading_day(today - one_day)
+    # 收盘后：仅当明天也是交易日才监控(周五/节前最后一个交易日收盘后不监控)
+    if t >= MARKET_CLOSE:
+        return is_trading_day(today + one_day)
+    # 盘中，正常监控
+    return True
 
 
 def getToken():
@@ -59,7 +136,7 @@ def getToken():
         exit(1)
 
 
-def getDataByConfig(token, api_path, fields_config, page_size, data_type_name, max_pages=None):
+def getDataByConfig(token, api_path, fields_config, page_size, data_type_name, max_pages=None, flowId=3):
     """
     按字段配置分页拉取接口数据，并抽取脚本后续处理需要的字段。
 
@@ -97,7 +174,7 @@ def getDataByConfig(token, api_path, fields_config, page_size, data_type_name, m
                 "condition": {
                     "startTime": "",
                     "endTime": "",
-                    "flowId": 3
+                    "flowId": flowId
                 },
                 "pagination": {
                     "pagenum": page_num,
@@ -299,17 +376,19 @@ def get_batch_workflow_status(token):
         "任务ID": "batchWorkflowId",
         "最后处理": "endTime",
         "状态": "runningStatus",
+        "异常信息": "failCause",
     }
     page_size = 50
     max_pages = 1
+    flowId = 5
     data_type_name = "基线任务"
 
-    res = getDataByConfig(token, api_path, fields_config, page_size, data_type_name, max_pages)
+    res = getDataByConfig(token, api_path, fields_config, page_size, data_type_name, max_pages, flowId)
     return res
 
 
 def get_message_notifyhistory(token):
-    """获取基线任务最近一次调度实例状态，用于判断离线加工任务是否异常。"""
+    """获取告警发送任务发送状态，"""
     api_path = "/managerCenter/message/notifyHistory/page"
     fields_config = {
         "通知任务名称": "objectName",
@@ -350,7 +429,12 @@ def send_wechat_alert(abnormal_tasks, task_type="通知任务", mention_users=No
 
     for i, task in enumerate(abnormal_tasks[:total], 1):
         name = task.get("任务名称") or task.get("通知任务名称") or "-"
-        label_map = STATUS_LABEL if task_type == "采集任务" else STREAM_STATUS_LABEL
+        if task_type == "采集任务":
+            label_map = STATUS_LABEL
+        elif task_type == "基线任务":
+            label_map = BASELINE_STATUS_LABEL
+        else:
+            label_map = STREAM_STATUS_LABEL
         status = label_map.get(task.get("状态"), str(task.get("状态", "-")))
         nodes = task.get("异常节点", [])
         target = task.get("目标", "-") or "-"
@@ -366,12 +450,19 @@ def send_wechat_alert(abnormal_tasks, task_type="通知任务", mention_users=No
             if err:
                 lines.append("> 异常信息：<font color=\"warning\">{}</font>".format(err))
         elif task_type == "基线任务":
-            exec_time = task.get("最后处理")
-            exec_time_dt = datetime.datetime.strptime(exec_time, '%Y-%m-%d %H:%M:%S')
-            now_dt = datetime.datetime.now()
-            diff_seconds = (now_dt - exec_time_dt).total_seconds()
-            diff_hours = diff_seconds / 3600
-            lines.append(f"> 基线任务异常: 最后一次执行时间{exec_time_dt}, 与当前时间相差{diff_hours:.1f}小时")
+            exec_time = task.get("最后处理", "-")
+            diff_hours = task.get("diff_hours")
+            if diff_hours is None:
+                try:
+                    exec_time_dt = datetime.datetime.strptime(exec_time, "%Y-%m-%d %H:%M:%S")
+                    diff_seconds = (datetime.datetime.now() - exec_time_dt).total_seconds()
+                    diff_hours = diff_seconds / 3600
+                except (ValueError, TypeError):
+                    diff_hours = 0
+            lines.append(f"> 最后处理: {exec_time} (距今{diff_hours:.1f}小时)")
+            fail_cause = task.get("异常信息") or ""
+            if fail_cause:
+                lines.append("> 异常信息：<font color=\"warning\">{}</font>".format(fail_cause))
         elif task_type == "通知任务":
             send_time = task.get("发送时间", "-") or "-"
             content = task.get("通知内容", "-") or "-"
@@ -446,18 +537,49 @@ def main():
         print(f"最后处理: {last_time}")
         print(f"任务状态: {status}")
 
-    # ========== 基线任务 ==========
+    # ========== 基线任务（只取最近2条调度记录） ==========
     print("\n\n=== 基线任务数据 ===")
-    baseline_task = get_batch_workflow_status(token)[0:1]
-    if baseline_task is None:
-        baseline_task = []
+    all_baseline = get_batch_workflow_status(token)
+    if not all_baseline:
+        all_baseline = []
+    baseline_task = all_baseline[:2]  # 只取最近2条
 
-    name = baseline_task[0].get("任务名称", "-")
-    last_time = baseline_task[0].get("最后处理", "-")
-    status = 2 if datetime.datetime.now().timestamp() - datetime.datetime.strptime(last_time,'%Y-%m-%d %H:%M:%S').timestamp() > 4000 else baseline_task[0].get("状态", "-")
-    print(f"\n流批任务: {name}")
-    print(f"最后处理: {last_time}")
-    print(f"任务状态: {status}")
+    is_abnormal = False
+
+    for t in baseline_task:
+        name = t.get("任务名称", "-")
+        last_time = t.get("最后处理", "-")
+        running_status = t.get("状态")  # 1=正常, 2=异常
+        fail_cause = t.get("异常信息") or ""
+
+        # 条件2: 最新两条中任意一条执行失败
+        if running_status == 2:
+            is_abnormal = True
+            t["状态"] = 2
+
+        status_label = BASELINE_STATUS_LABEL.get(t["状态"], str(t["状态"]))
+        print(f"\n基线任务: {name}")
+        print(f"最后处理: {last_time}")
+        print(f"任务状态: {status_label}")
+        if fail_cause:
+            print(f"异常信息: {fail_cause}")
+
+    # 条件1: 最新一条的发送时间与当前时间超过1小时
+    if baseline_task:
+        latest = baseline_task[0]
+        last_time = latest.get("最后处理", "-")
+        if last_time and last_time != "-":
+            last_dt = datetime.datetime.strptime(last_time, '%Y-%m-%d %H:%M:%S')
+            diff_seconds = (datetime.datetime.now() - last_dt).total_seconds()
+            diff_hours = diff_seconds / 3600
+            for t in baseline_task:
+                t["diff_hours"] = diff_hours
+            if diff_seconds > 3600:
+                is_abnormal = True
+                latest["状态"] = 2
+                if not latest.get("异常信息"):
+                    latest["异常信息"] = "最后处理时间超过1小时未更新"
+                print(f">>> 最新一条最后处理时间距今{diff_hours:.1f}小时，超过1小时，标记异常")
 
     # ========== 通知任务 ==========
     print("\n\n=== 通知任务数据 ===")
@@ -502,8 +624,15 @@ def main():
             print(f"    [异常] {t.get('任务名称', '-')} -> 异常节点: {node_str}")
 
     # ========== 离线加工任务汇总 ==========
-    baseline_abnormal = [t for t in baseline_task if status == 2]
+    baseline_abnormal = [t for t in baseline_task if t.get("状态") == 2]
     print(f">>> 基线任务: {len(baseline_task)} 条, 异常: {len(baseline_abnormal)} 条")
+    if baseline_abnormal:
+        for t in baseline_abnormal:
+            print(f"    [异常] {t.get('任务名称', '-')} -> 最后处理: {t.get('最后处理', '-')}")
+        # 有一条异常就把两条都发出去，方便对比查看
+        baseline_alert = baseline_task
+    else:
+        baseline_alert = []
 
     # ========== 通知任务汇总 ==========
     today_str = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -512,10 +641,37 @@ def main():
     print(f">>> 通知任务: {len(message_task)} 条, 异常: {len(message_abnormal)} 条")
 
     # 发送告警
+    # 仅「柜台功能号指标监控采集」这一个任务跟随 A股交易时段：
+    # 休市期间(周末、节假日、收盘后到下一交易日开盘前)不发它的告警，其他采集任务照常。
+    if not is_ashare_monitor_period():
+        skipped = [t for t in collect_abnormal if t.get("任务名称") == COUNTER_TASK_NAME]
+        if skipped:
+            print(f">>> A股休市时段，跳过「{COUNTER_TASK_NAME}」告警 {len(skipped)} 条")
+        collect_abnormal = [t for t in collect_abnormal if t.get("任务名称") != COUNTER_TASK_NAME]
+
+    # 免告警黑名单过滤：列表中的任务异常时不发送告警，所有任务类型通用。
+    collect_skip = [t for t in collect_abnormal if t.get("任务名称") in NO_ALERT_TASKS]
+    if collect_skip:
+        print(f">>> 免告警列表跳过采集任务告警 {len(collect_skip)} 条: "
+              f"{', '.join(t.get('任务名称', '-') for t in collect_skip)}")
+    collect_abnormal = [t for t in collect_abnormal if t.get("任务名称") not in NO_ALERT_TASKS]
+
+    stream_skip = [t for t in stream_abnormal if t.get("任务名称") in NO_ALERT_TASKS]
+    if stream_skip:
+        print(f">>> 免告警列表跳过流批任务告警 {len(stream_skip)} 条: "
+              f"{', '.join(t.get('任务名称', '-') for t in stream_skip)}")
+    stream_abnormal = [t for t in stream_abnormal if t.get("任务名称") not in NO_ALERT_TASKS]
+
+    baseline_skip = [t for t in baseline_alert if t.get("任务名称") in NO_ALERT_TASKS]
+    if baseline_skip:
+        print(f">>> 免告警列表跳过基线任务告警 {len(baseline_skip)} 条: "
+              f"{', '.join(t.get('任务名称', '-') for t in baseline_skip)}")
+    baseline_alert = [t for t in baseline_alert if t.get("任务名称") not in NO_ALERT_TASKS]
+
     send_wechat_alert(collect_abnormal, "采集任务")
     send_wechat_alert(stream_abnormal, "流批任务")
-    send_wechat_alert(baseline_abnormal, "基线任务")
-    send_wechat_alert(message_abnormal, "通知任务")
+    send_wechat_alert(baseline_alert, "基线任务")
+    # send_wechat_alert(message_abnormal, "通知任务")
 
 
 if __name__ == "__main__":
